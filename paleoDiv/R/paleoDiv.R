@@ -1163,7 +1163,7 @@ return(dd)
 #' @param precision_ma Size of intervals (in ma) at which to calculate diversity within the age range.
 #' @return A data.frame() with two columns: ma, for the numerical age, and tax, for the taxon. 
 #' @details
-#' Each taxon receives one entry per occurrence per time interval. The number of entries per taxon at any given point is thus proportional to the abundance of the taxon in the fossil record, and can be used for plotting with frequency- or density-based functions (e.g. hist(), ggplot2::geom_violin(), etc.). Note that using age values in the original occurrence table instead of this function will usually be more than sufficient and this function thus unnecessary.
+#' Each taxon receives one entry per occurrence per time interval. The number of entries per taxon at any given point is thus proportional to the abundance of the taxon in the fossil record, and can be used for plotting with frequency- or density-based functions (e.g. hist(), ggplot2::geom_violin(), etc.). Note that using age values in the original occurrence table instead of this function will often be fully sufficient if the number of occurrences is considered an adequate proxy for abundance. However, instead using the ab.gg() and thus visualizing the results of the abdistr_() function has the benefit of the ability to account for a column of abundance values within the occurrence dataset, if available.
 #' @export ab.gg
 #' @examples
 #' data(archosauria)
