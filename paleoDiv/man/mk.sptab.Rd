@@ -13,18 +13,18 @@ mk.sptab(
 )
 }
 \arguments{
-\item{xx}{A data.frame() of occurrence records, containing at least the following collumns: taxonomic name at level at which ranges are to be determined (e.g. species or genus), earliest possible age for each occurrence and latest possible age for each occurrence. If xx==NULL, then each collumn or vector must be specified individualy using the following parameters}
+\item{xx}{A data.frame() of occurrence records, containing at least the following columns: taxonomic name at level at which ranges are to be determined (e.g. species or genus), earliest possible age for each occurrence and latest possible age for each occurrence. If xx==NULL, then each column or vector must be specified individualy using the following parameters}
 
-\item{taxa}{Collumn/vector containing the taxonomic variable. Defaults to xx$tna}
+\item{taxa}{column/vector containing the taxonomic variable. Defaults to xx$tna}
 
-\item{earliest}{Collumn/vector containing the earliest age estimate. Defaults to xx$eag.}
+\item{earliest}{column/vector containing the earliest age estimate. Defaults to xx$eag.}
 
-\item{latest}{Collumn/vector containing the latest age estimate. Defaults to xx$lag.}
+\item{latest}{column/vector containing the latest age estimate. Defaults to xx$lag.}
 
-\item{tax}{Optional. A single character string containing the taxon name, to be added as another collumn to the range table (useful for categorization, should several range tables be concatenated, e.g. using rbind()).}
+\item{tax}{Optional. A single character string containing the taxon name, to be added as another column to the range table (useful for categorization, should several range tables be concatenated, e.g. using rbind()).}
 }
 \value{
-A data.frame() containing the taxon names, the maximum and minimum age for each taxon, and (optionally) a collumn with the name of the higher-level taxon.
+A data.frame() containing the taxon names, the maximum and minimum age for each taxon, and (optionally) a column with the name of the higher-level taxon.
 }
 \description{
 Generate a taxon-range table based on an occurrence dataset.

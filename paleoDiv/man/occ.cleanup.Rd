@@ -9,7 +9,7 @@ occ.cleanup(x, remove = NULL)
 \arguments{
 \item{x}{A occurrence data.frame or character vector containing the variable to clean up (defaults to x$tna)}
 
-\item{remove}{Which values to remove. If NULL, a default set of commonly occurring character combinations is used ("n. gen.", "n. sp.", "cf.", double, leading and ending spaces). If used-defined, remove needs to be formatted as a character vector with the values to be removed as names, i.e. in the format of c("remove_this" = "", "removethistoo"="")}
+\item{remove}{Which values to remove. If NULL, a default set of commonly occurring character combinations is used ("n. gen.", "n. sp.", "cf.","aff.", punctuation, as well as double, leading and ending spaces). If user-defined, remove needs to be formatted as a character vector with the values to be removed as names, i.e. in the format of c("remove_this" = "", "removethistoo"="")}
 }
 \value{
 A character vector containing the cleaned up taxonomic names.

@@ -9,7 +9,7 @@ pdb.union(x, id_col = x$occurrence_no)
 \arguments{
 \item{x}{Concatenated occurrence data.frames to be merged}
 
-\item{id_col}{Vector or collumn of x containing id to be used for determining which values contain occurrence numbers to be used for matching entries}
+\item{id_col}{Vector or column of x containing id to be used for determining which values contain occurrence numbers to be used for matching entries}
 }
 \value{
 A data.frame() containing the first entry for each unique occurrence to be represented in x.

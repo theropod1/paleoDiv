@@ -14,7 +14,7 @@ tree.ages(phylo0 = NULL, data = NULL, taxa = phylo0$tip.label)
 \item{taxa}{Taxa to include in calibration matrix, defaults to phylo0$tip.label}
 }
 \value{
-A two-collumn matrix containing earliest and latest occurrences for each taxon in taxa, with taxon names as row names
+A two-column matrix containing earliest and latest occurrences for each taxon in taxa, with taxon names as row names
 }
 \description{
 Automatically build matrix for time-calibration of phylogenetic trees using occurrence data

@@ -9,7 +9,7 @@ stax.sel(taxa, rank = x$class, x = NULL)
 \arguments{
 \item{taxa}{A vector containing subtaxa (or any other entries matching entries of rank) to be returned}
 
-\item{rank}{Vector or collumn of x in which to look for entries matching taxa. defaults to x$class, for selecting class-level subtaxa from large datasets (only works if pdb(...,full=TRUE)}
+\item{rank}{Vector or column of x in which to look for entries matching taxa. defaults to x$class, for selecting class-level subtaxa from large datasets (only works if pdb(...,full=TRUE)}
 
 \item{x}{Optional occurrence data.frame. If set, a data.frame with the selected entries will be returned.}
 }

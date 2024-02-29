@@ -26,26 +26,26 @@ We can start the analysis by downloading some occurrence data from the Paleobiol
 pdb("Stegosauria")->Stegosauria
 ```
 
-The resulting occurrence dataset should look somewhat like this (but with more collumns and many more rows):
+The resulting occurrence dataset should look somewhat like this (but with more columns and many more rows):
 ```{r}
 knitr::kable(head(Stegosauria[,c(c(1:7),18,20:21)]))
 ```
-The collumns that are of primary interest here are occurrence_no, tna (which at this point is simply a copy of identified_name), eag and lag (which contain the maximum and minimum ages of the occurrence).
+The columns that are of primary interest here are occurrence_no, tna (which at this point is simply a copy of identified_name), eag and lag (which contain the maximum and minimum ages of the occurrence).
 
-Since the identified_name/tna collumn at this point will contain a fair deal of common character combinations leading to an overinflation of unique values (e.g. cf., gen. nov., sp. nov., extra spaces etc), it is recommended to run the following:
+Since the identified_name/tna column at this point will contain a fair deal of common character combinations leading to an overinflation of unique values (e.g. cf., gen. nov., sp. nov., extra spaces etc), it is recommended to run the following:
 
 ```{r}
 occ.cleanup(Stegosauria)->Stegosauria$tna
 ```
 
-This replaces the tna-collumn with a filtered version, with such common character strings removed. The function also prints a message giving information about the reduction in unique factor levels of tna. In this case `r length(levels(factor(Stegosauria$identified_name))) ` are reduced to `r length(levels(factor(Stegosauria$tna)))`. This reduces the number of duplicate taxa in the dataset, and thus will help provide more accurate absolute diversity estimates down the line. However, if complete taxonomic accuracy is the goal, then manually checking the dataset (e.g. after the next step, see below) may become necessary.
+This replaces the tna-column with a filtered version, with such common character strings removed. The function also prints a message giving information about the reduction in unique factor levels of tna. In this case `r length(levels(factor(Stegosauria$identified_name))) ` are reduced to `r length(levels(factor(Stegosauria$tna)))`. This reduces the number of duplicate taxa in the dataset, and thus will help provide more accurate absolute diversity estimates down the line. However, if complete taxonomic accuracy is the goal, then manually checking the dataset (e.g. after the next step, see below) may become necessary.
 
-If we are interested in analyzing the pattern of paleobiodiversity, our next step in the paleoDiv workflow is to build a taxon-range table, which is simply a data.frame() containing the minimum and maximum ages for each unique factor value in tna (or, if manually modified, any other collumn or vector). We do this using the mk.sptab() function.
+If we are interested in analyzing the pattern of paleobiodiversity, our next step in the paleoDiv workflow is to build a taxon-range table, which is simply a data.frame() containing the minimum and maximum ages for each unique factor value in tna (or, if manually modified, any other column or vector). We do this using the mk.sptab() function.
 
 ```{r}
 mk.sptab(Stegosauria)->sptab_Stegosauria
 ```
-By default, mk.sptab() takes an occurrence dataset as input and creates a range table containing one row for each unique factor level in the collumn tna. However, these settings are freely modifiable, making the function applicable to any collumns in a data.frame() or even individual vectors containing the maximum and minimum ages and the taxon names (or other category).
+By default, mk.sptab() takes an occurrence dataset as input and creates a range table containing one row for each unique factor level in the column tna. However, these settings are freely modifiable, making the function applicable to any columns in a data.frame() or even individual vectors containing the maximum and minimum ages and the taxon names (or other category).
 
 Our generated taxon-range table should now look like this:
 
@@ -61,7 +61,6 @@ pdb.autodiv(c("Stegosauria","Ankylosauria"))->Thyreophora
 ```
 
 This represents the most convenient method of quickly downloading occurrence data and constructing taxon-range tables for multiple clades in the paleoDiv package. The output of pdb.autodiv is a list() object containing multiple data.frames(): one for each occurrence dataset downloaded from the Paleobiology database, and one for each taxon’s taxon-range table, with the prefix "sptab_".
-
 
 Having generated a taxon-range table, we can now use it to estimate and plot diversity using the function divdistr_():
 
@@ -94,7 +93,7 @@ curve(divdistr_(x,sptab_Stegosauria), xlim=c(200,100),ylim=c(-5,35), lwd=2,xlab=
 ts.stages(ylim=c(-6,-1),alpha=0.3,border=add.alpha("grey",0.3))
 ts.periods(ylim=c(-6,-1),alpha=0.0)
 
-curve(abdistr_(x,archosauria$Stegosauria)/4, xlim=c(200,100),ylim=c(-5,35),col="red", lwd=2,lty=2,add=T)
+curve(abdistr_(x,Stegosauria)/4, xlim=c(200,100),ylim=c(-5,35),col="red", lwd=2,lty=2,add=T)
 axis(4,at=seq(0,30,5), lab=seq(0,30,5)*4, col.axis="red")
 ```
 
@@ -102,7 +101,7 @@ axis(4,at=seq(0,30,5), lab=seq(0,30,5)*4, col.axis="red")
 If we are interested in how collection intensity/the number of collections compares to taxonomic diversity or abundance, we can use pdb() to download collections data instead of occurrence data:
 ```{r cache=TRUE, fig.height=5, fig.width=7}
 pdb("Stegosauria", what="colls")->Stegosauria_colls
-curve(divdistr_(x,archosauria$sptab_Stegosauria), xlim=c(200,100),ylim=c(-5,35), lwd=2,xlab="Age [ma]",ylab="Species Diversity Estimate")
+curve(divdistr_(x,sptab_Stegosauria), xlim=c(200,100),ylim=c(-5,35), lwd=2,xlab="Age [ma]",ylab="Species Diversity Estimate")
 #to add a geological timescale, we can use ts.stages() and ts.periods():
 ts.stages(ylim=c(-6,-1),alpha=0.3,border=add.alpha("grey",0.3))
 ts.periods(ylim=c(-6,-1),alpha=0.0)
@@ -144,17 +143,16 @@ abline(v=tsconv(c(252,201.3,66),tree_archosauria),lwd=2, col="grey90")
 
 mtext(side=3, cex=1.2,"paleoDiv::divdistr_()",col="darkgrey")
 
-#we can also manually add spindles using viol(), e.g. to add the diversity of important subtaxa within other spindles:
+#we can manually add spindles anywhere using viol(), e.g. to plot the diversity of important subtaxa, in this case that of birds:
 viol(x=c(260:0),stat=divdistr_, pos=13, table=convert.sptab(archosauria$sptab_Aves,tree_archosauria),dscale=0.005, cutoff=tsconv(c(165,0),tree_archosauria),fill=add.alpha("grey40"), col=add.alpha("grey40"))
-#text(tsconv(40,tree_archosauria), 13, adj=0, "Aves",col="grey40") #We can also generate custom labels using text()
 ```
 
 Important parameters for phylo.spindles include:
 * phylo0 The phylogeny to be plotted. This should be time-calibrated (e.g. using strap:datePhylo())
-* occ The dataset to be used for plotting. This has to either be a list() containing data.frames to be used as an argument for the function divdistr_() (or any other function it is overridden with) as parameter "table", or a data.frame() or matrix() containing an x collumn and collumns matching the names of the phylogenetic tree’s tip.labels.
-* ages Optional data matrix used for cropping each spindle to the known stratigraphic range of the taxon. If provided, this should take the form of a matrix with row names being the same as the trees tip.labels, and two collumns named "FAD" and "LAD" giving minimum and maximum geological ages for each taxon.
+* occ The dataset to be used for plotting. This has to either be a list() containing data.frames to be used as an argument for the function divdistr_() (or any other function it is overridden with) as parameter "table", or a data.frame() or matrix() containing an x column and columns matching the names of the phylogenetic tree’s tip.labels.
+* ages Optional data matrix used for cropping each spindle to the known stratigraphic range of the taxon. If provided, this should take the form of a matrix with row names being the same as the trees tip.labels, and two columns named "FAD" and "LAD" giving minimum and maximum geological ages for each taxon.
 * dscale Vertical scaling parameter for the spindles. May need manual adjustment, depending on the desired scale.
-* txt.x Either a single number of a vector of the same length as the number of tree tips giving the horizontal position for labels (if labels==TRUE). In this case, the second collumn of ages is used, placing the labels at the end of the spindles, but the first and last values are replaced by 66 in order to place labels within the plot boundaries
+* txt.x Either a single number of a vector of the same length as the number of tree tips giving the horizontal position for labels (if labels==TRUE). In this case, the second column of ages is used, placing the labels at the end of the spindles, but the first and last values are replaced by 66 in order to place labels within the plot boundaries
 * For further details, see ?phylo.spindles
 
 Note that ape::plot.phylo(), which is used by this function for generating the tree, plots trees to a time coordinate counting forward from the root age. As a result, we need to convert all geological ages to this coordinate system by subtracting them from the root age of the phylogeny (facilitated by the tsconv()-function which takes ages and a tree as input).

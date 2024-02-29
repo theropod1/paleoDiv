@@ -46,12 +46,12 @@ curve(divdistr_(x,sptab_Stegosauria), xlim=c(200,100),ylim=c(-5,35), lwd=2,xlab=
 ts.stages(ylim=c(-6,-1),alpha=0.3,border=add.alpha("grey",0.3))
 ts.periods(ylim=c(-6,-1),alpha=0.0)
 
-curve(abdistr_(x,archosauria$Stegosauria)/4, xlim=c(200,100),ylim=c(-5,35),col="red", lwd=2,lty=2,add=T)
+curve(abdistr_(x,Stegosauria)/4, xlim=c(200,100),ylim=c(-5,35),col="red", lwd=2,lty=2,add=T)
 axis(4,at=seq(0,30,5), lab=seq(0,30,5)*4, col.axis="red")
 
 ## ----cache=TRUE, fig.height=5, fig.width=7------------------------------------
 pdb("Stegosauria", what="colls")->Stegosauria_colls
-curve(divdistr_(x,archosauria$sptab_Stegosauria), xlim=c(200,100),ylim=c(-5,35), lwd=2,xlab="Age [ma]",ylab="Species Diversity Estimate")
+curve(divdistr_(x,sptab_Stegosauria), xlim=c(200,100),ylim=c(-5,35), lwd=2,xlab="Age [ma]",ylab="Species Diversity Estimate")
 #to add a geological timescale, we can use ts.stages() and ts.periods():
 ts.stages(ylim=c(-6,-1),alpha=0.3,border=add.alpha("grey",0.3))
 ts.periods(ylim=c(-6,-1),alpha=0.0)
@@ -86,9 +86,8 @@ abline(v=tsconv(c(252,201.3,66),tree_archosauria),lwd=2, col="grey90")
 
 mtext(side=3, cex=1.2,"paleoDiv::divdistr_()",col="darkgrey")
 
-#we can also manually add spindles using viol(), e.g. to add the diversity of important subtaxa within other spindles:
+#we can manually add spindles anywhere using viol(), e.g. to plot the diversity of important subtaxa, in this case that of birds:
 viol(x=c(260:0),stat=divdistr_, pos=13, table=convert.sptab(archosauria$sptab_Aves,tree_archosauria),dscale=0.005, cutoff=tsconv(c(165,0),tree_archosauria),fill=add.alpha("grey40"), col=add.alpha("grey40"))
-#text(tsconv(40,tree_archosauria), 13, adj=0, "Aves",col="grey40") #We can also generate custom labels using text()
 
 ## ----fig.height=5, fig.width=7------------------------------------------------
 data(diversity_table)

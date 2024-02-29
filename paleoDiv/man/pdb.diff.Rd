@@ -11,7 +11,7 @@ pdb.diff(x, subtract, id_col = x$occurrence_no)
 
 \item{subtract}{Occurrence data frame or vector of occurrence numbers to subtract from x}
 
-\item{id_col}{Vector or collumn of x containing id to be used for determining which values are also found in subtract or subtract$occurrence_no}
+\item{id_col}{Vector or column of x containing id to be used for determining which values are also found in subtract or subtract$occurrence_no}
 }
 \value{
 A data.frame() containing the difference between the two occurrence datasets, i.e. all entries that are in x but not in subtract.

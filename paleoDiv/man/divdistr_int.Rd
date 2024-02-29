@@ -13,9 +13,9 @@ divdistr_int(x, table = NULL, ids = F, max = table$max, min = table$min)
 
 \item{ids}{Logical whether to return ids of entries in taxon-range table (defaults to FALSE) or their number}
 
-\item{max}{Vector or collumn containing the maximum age of each entry in the taxon-range table. Defaults to table$max}
+\item{max}{Vector or column containing the maximum age of each entry in the taxon-range table. Defaults to table$max}
 
-\item{min}{Vector or collumn containing the minimum age of each entry in the taxon-range table. Defaults to table$min}
+\item{min}{Vector or column containing the minimum age of each entry in the taxon-range table. Defaults to table$min}
 }
 \value{
 A single numeric giving the number of entries in table overlapping the specified interval, or a numeric vector giving their indices.

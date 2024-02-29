@@ -18,7 +18,7 @@ div.gg(data, taxa, agerange = c(252, 66), precision_ma = 1, prefix = "sptab_")
 \item{prefix}{Prefix under which to find taxon-range tables in data}
 }
 \value{
-A data.frame() with two collumns: ma, for the numerical age, and tax, for the taxon.
+A data.frame() with two columns: ma, for the numerical age, and tax, for the taxon.
 }
 \description{
 Make a data.frame() that can be used to plot diversity data with density plots, e.g. in ggplot2

@@ -16,7 +16,7 @@ ab.gg(data, taxa = NULL, agerange = c(252, 66), precision_ma = 1)
 \item{precision_ma}{Size of intervals (in ma) at which to calculate diversity within the age range.}
 }
 \value{
-A data.frame() with two collumns: ma, for the numerical age, and tax, for the taxon.
+A data.frame() with two columns: ma, for the numerical age, and tax, for the taxon.
 }
 \description{
 Make a data.frame() that can be used to plot diversity data with density plots, e.g. in ggplot2

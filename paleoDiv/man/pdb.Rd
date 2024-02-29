@@ -13,10 +13,10 @@ pdb(taxon = "", interval = "all", what = "occs", full = F)
 
 \item{what}{The type of data to download (for details, see https://paleobiodb.org/data1.2/). Defaults to "occs", which downloads occurrence data. Setting this parameter to "colls" will instead download collection data.}
 
-\item{full}{A logical indicating whether or not the full dataset is to be downloaded (defaults to FALSE). At the expense of larger file size, the full dataset contains a large number of additional collumns containing data such as stratigraphy, phylogeny and (paleo)geography, which is useful for various purposes but not strictly necessary for graphing paleodiversity.}
+\item{full}{A logical indicating whether or not the full dataset is to be downloaded (defaults to FALSE). At the expense of larger file size, the full dataset contains a large number of additional columns containing data such as stratigraphy, phylogeny and (paleo)geography, which is useful for various purposes but not strictly necessary for graphing paleodiversity.}
 }
 \value{
-A data.frame() containing the downloaded paleobioDB dataset. The collumn "identified_name" will be copied into the collumn "tna", and (if what==occs) the collumns "max_ma" and "min_ma" will be copied into the collumns named "eag" and "lag" respectively, maintaining compatibility with the output of the deprecated package "paleobioDB" for those variable names.
+A data.frame() containing the downloaded paleobioDB dataset. The column "identified_name" will be copied into the column "tna", and (if what==occs) the columns "max_ma" and "min_ma" will be copied into the columns named "eag" and "lag" respectively, maintaining compatibility with the output of the deprecated package "paleobioDB" for those variable names.
 }
 \description{
 Download data from the paleobiology database.

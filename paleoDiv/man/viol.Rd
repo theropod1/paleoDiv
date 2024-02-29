@@ -14,6 +14,8 @@ viol(
   horiz = TRUE,
   add = T,
   lim = cutoff,
+  xlab = "",
+  ylab = "",
   fill = "grey",
   col = "black",
   lwd = 1,
@@ -39,6 +41,10 @@ viol(
 \item{add}{Logical indicating whether to add to an existing plot (defaults to TRUE) or generate a new plot.}
 
 \item{lim}{Limits (in the dimensions of x) used for plotting, if add==FALSE. Defaults to cutoff, but can be manually set as a numeric vector of length 2, giving the lower and upper limits of the plot.}
+
+\item{xlab}{x axis label}
+
+\item{ylab}{y axis label}
 
 \item{fill}{Fill color for the plotted violin}
 
