@@ -26,9 +26,9 @@ We can start the analysis by downloading some occurrence data from the Paleobiol
 pdb("Stegosauria")->Stegosauria
 ```
 
-The resulting occurrence dataset should look somewhat like this (but with more columns and many more rows):
+The resulting occurrence dataset should look somewhat like this (but with many more rows):
 ```{r}
-knitr::kable(head(Stegosauria[,c(c(1:7),18,20:21)]))
+knitr::kable(head(Stegosauria))
 ```
 The columns that are of primary interest here are occurrence_no, tna (which at this point is simply a copy of identified_name), eag and lag (which contain the maximum and minimum ages of the occurrence).
 

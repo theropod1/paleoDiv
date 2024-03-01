@@ -525,7 +525,7 @@ stop("Only phylogram and cladogram supported so far")
 #' @examples
 #' pdb("Stegosauria")->Stegosauria
 
-pdb<-function(taxon="", interval="all", what="occs", full=F){
+pdb<-function(taxon, interval="all", what="occs", full=F){
 
 base<-"https://paleobiodb.org/data1.2/"
 
@@ -541,8 +541,20 @@ if(full==TRUE){
     }else{
     pbdb_url <-paste0(base,what,"/list.csv?base_name=",taxon,"&interval=",interval)}
     }
-occ<-read.csv(pbdb_url)
 
+
+#occ<-read.csv(pbdb_url)
+
+tryCatch({read.csv(pbdb_url)}, error=function(e){
+return(paste("ERROR:", e$message))
+
+},warning=function(w){
+return(paste("WARNING:", w$message))
+
+})->occ
+
+
+if(is.data.frame(occ)){
     if(what=="occs"){
 occ$identified_name->occ$tna#for colname compatibility with deprecated paleobiodb package
 }
@@ -550,8 +562,14 @@ occ$identified_name->occ$tna#for colname compatibility with deprecated paleobiod
 occ$hltax<-taxon#higher level taxon for categorization,e.g. if tables are combined via rbind
 occ$min_ma->occ$lag#for colname compatibility with deprecated paleobiodb package
 occ$max_ma->occ$eag#for colname compatibility with deprecated paleobiodb package
-
 return(occ)
+
+}else if(length(occ)==1){
+print(occ)
+if(occ=="ERROR: more columns than column names"){print("This probably means that the taxonomic name you entered could not be found on paleobiodb.org.")}
+invisible(occ)
+}
+
 }
 
 
@@ -869,16 +887,25 @@ pdb(treetips[i],interval=interval)->occ[[i]]
 }
 
 
-if(cleanup==TRUE){
+if(cleanup==TRUE & is.data.frame(occ[[i]])){
 occ.cleanup(occ[[i]])->occ[[i]]$tna}
+
+names(occ)[i]<-treetips[i]
 }
-names(occ)<-treetips
 
 #build species tables
 for(i in 1:length(treetips)){
-mk.sptab(eval(parse(text=paste0("occ$",treetips[i]))),tax=treetips[i])->occ[[length(treetips)+i]]
+
+if(is.data.frame(occ[[treetips[i]]])){
+
+mk.sptab(occ[[treetips[i]]],tax=treetips[i])->occ[[length(treetips)+i]]
+
+names(occ)[length(treetips)+i]<-paste0("sptab_", treetips[i])
+
+}else{#is no data frame is found, don’t build species table
+print(paste0("No occurrence data.frame() found for ", treetips[i], ". Proceeding without it."))}
 }
-names(occ)<-c(treetips,paste0("sptab_", treetips))
+
 
 return(occ)
 }
@@ -1089,15 +1116,16 @@ viol(occ[,"x"], pos=i, stat=occ[,phylo0$tip.label[i]], dscale=dscale, col=col, f
 
 
 if(labels==T){#add labels
+if(length(txt.y)==1){txt.y<-rep(txt.y, length(phylo0$tip.label))}
 
 if(length(txt.x)>1){#if a vector of x values for labels is provided
     if(length(which(names(txt.x)==phylo0$tip.label[i]))==1){
     which(names(txt.x)==phylo0$tip.label[i])->j
-    text(x=1-(txt.x[j]-phylo0$root.time),y=i,adj=c(0,txt.y), phylo0$tip.label[i], cex=cex.txt,col=col.txt)
+    text(x=1-(txt.x[j]-phylo0$root.time),y=i,adj=c(0,txt.y[i]), phylo0$tip.label[i], cex=cex.txt,col=col.txt)
     }else{
-    text(x=1-(txt.x[i]-phylo0$root.time),y=i,adj=c(0,txt.y), phylo0$tip.label[i], cex=cex.txt,col=col.txt)}
+    text(x=1-(txt.x[i]-phylo0$root.time),y=i,adj=c(0,txt.y[i]), phylo0$tip.label[i], cex=cex.txt,col=col.txt)}
 }else{
-text(x=1-(txt.x-phylo0$root.time),y=i,adj=c(0,txt.y), phylo0$tip.label[i], cex=cex.txt,col=col.txt)}
+text(x=1-(txt.x-phylo0$root.time),y=i,adj=c(0,txt.y[i]), phylo0$tip.label[i], cex=cex.txt,col=col.txt)}
 }
 
 }#end loop

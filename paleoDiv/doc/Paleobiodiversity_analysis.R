@@ -11,7 +11,7 @@ library(paleoDiv)
 pdb("Stegosauria")->Stegosauria
 
 ## -----------------------------------------------------------------------------
-knitr::kable(head(Stegosauria[,c(c(1:7),18,20:21)]))
+knitr::kable(head(Stegosauria))
 
 ## -----------------------------------------------------------------------------
 occ.cleanup(Stegosauria)->Stegosauria$tna
