@@ -1,6 +1,6 @@
 Package: paleoDiv
 Title: Extracting and Visualizing Paleobiodiversity
-Version: 0.0.7
+Version: 0.1.0
 Authors@R: 
     person("Darius", "Nau", , "dariusnau@gmx.at", role = c("aut", "cre"))
 Description: Functions for conveniently downloading and editing taxon-specific datasets from the Paleobiology Database <https://paleobiodb.org>, extracting information on abundance, temporal distribution of subtaxa and taxonomic diversity through deep time, and visualizing these data in relation to phylogeny and stratigraphy.

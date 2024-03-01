@@ -25,9 +25,9 @@ Make a data.frame() that can be used to plot diversity data with density plots, 
 Each taxon receives one entry per occurrence per time interval. The number of entries per taxon at any given point is thus proportional to the abundance of the taxon in the fossil record, and can be used for plotting with frequency- or density-based functions (e.g. hist(), ggplot2::geom_violin(), etc.). Note that using age values in the original occurrence table instead of this function will often be fully sufficient if the number of occurrences is considered an adequate proxy for abundance. However, instead using the ab.gg() and thus visualizing the results of the abdistr_() function has the benefit of the ability to account for a column of abundance values within the occurrence dataset, if available.
 }
 \examples{
-data(archosauria)
-ab.gg(archosauria, taxa=c("Pterosauria","Aves"), agerange=c(252,0),precision_ma=1)->flyers
+pdb.autodiv(c("Coelophysoidea","Stegosauria"))->occ
+ab.gg(data=occ, taxa=c("Coelophysoidea","Stegosauria"), agerange=c(252,0),precision_ma=1)->dino
 library(ggplot2)
-ggplot(data=flyers, aes(x=tax, y=ma))+ylim(252,0)+geom_violin(scale="count")
-ggplot(data=flyers, aes(col=tax, x=ma))+xlim(252,0)+geom_density(adjust=0.5)
+ggplot(data=dino, aes(x=tax, y=ma, col=tax))+ylim(252,0)+geom_violin(scale="count")
+ggplot(data=dino, aes(col=tax, x=ma))+xlim(252,0)+geom_density(adjust=0.5)
 }

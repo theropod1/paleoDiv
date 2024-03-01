@@ -608,8 +608,61 @@ return(sptab)
 
 
 
+##Function synonymize
+#'Combine selected entries in a taxon-range table to remove duplicates
+#'
+#' @param x Indices or values (taxon names) to combine
+#' @param table Taxon-range table
+#' @param ids Vector or column of taxon names (used for matching taxon names in x). Defaults to table$tna
+#' @param max Vector or column containing maximum ages
+#' @param min Vector or column containing minimum ages
+#' @return A data.frame containing taxon names, maximum, minimum and mean ages, with ranges for the selected entries merged and superfluos entries removed (note that the first taxon indicated by x is kept as valid).
+#' @details This function is meant as an aid to manually editing species tables and remove synonyms or incorrect spellings of taxonomic name that result in an inflated number of distinct taxa being represented.
+#' @export synonymize
+#' @examples
+#' data(archosauria)
+#' sp<-archosauria$sptab_Stegosauria
+#' synonymize(c(32,33),sp)->sp
+#' synonymize(grep("stenops",sp$tna),sp)->sp
+#' synonymize(c("Hesperosaurus mjosi","Stegosaurus mjosi"),sp)->sp
 
-#This function counts the number of species in a "species table" (output of mk.sptab) at points in time x. Can be applied to vectors and for graphing, e.g. using curve(divdistr_(x,sptab) or with ggplot2)
+synonymize<-function(x,table=NULL, ids=table$tna, max=table$max, min=table$min){
+if(length(x)<2){stop("You must provide at least two taxon names or row numbers to synonymize!")}
+
+if(!(length(ids) == length(max) & length(ids) == length(min))){
+stop("ids, max and min must have the same number of elements!")}
+
+c1<-!is.null(table) & is.data.frame(table) & sum(ids==table$tna) == length(ids) & sum(max==table$max) == length(max) & sum(min==table$min) == length(min) #test whether ids, min and max are columns of table
+
+if(is.numeric(x)){
+indices<-x
+}else{
+which(ids == x[1])->indices
+indices<-c(indices, which(ids %in% x[2:length(x)]))
+}
+
+max_<-max(max[indices])
+min_<-min(min[indices])
+
+ids[indices]<-ids[indices[1]]
+max[indices]<-max_
+min[indices]<-min_
+
+if(c1==TRUE){ #if table contains the vectors to be evaluated, replace them in the table
+table$tna<-ids
+table$max<-max
+table$min<-min
+
+table[-indices[c(2:length(indices))],]->table
+
+}else{#otherwise, build new data.frame
+table<-data.frame(tna=ids, max=max, min=min, ma=(min+max)/2)
+table[-indices[c(2:length(indices))],]->table
+}
+
+return(table)
+}
+##
 
 
 ##Function divdistr_
