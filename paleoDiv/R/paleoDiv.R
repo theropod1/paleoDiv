@@ -566,7 +566,7 @@ return(occ)
 
 }else if(length(occ)==1){
 print(occ)
-if(occ=="ERROR: more columns than column names"){print("This probably means that the taxonomic name you entered could not be found on paleobiodb.org.")}
+if(occ=="ERROR: more columns than column names"){print(paste0("This probably means that the taxonomic name you entered (",taxon,") could not be found on paleobiodb.org."))}
 invisible(occ)
 }
 
@@ -934,12 +934,18 @@ LAD<-numeric(length(taxa))
 
 if(is.null(data)){#if no list() object given, look up data on the paleobiology database server
 for(i in 1:length(taxa)){
-pdb(taxa[i])[,c("eag","lag")]->data_
+pdb(taxa[i])->data_
+if(is.data.frame(data_)){
+data_[,c("eag","lag")]->data_
 #find and save minimum and maximum recorded taxon ages
 max(data_)->FAD[i]
 min(data_)->LAD[i]
-
-}}else{#if list object is given, try to find taxa there
+}else{#if data contains an error or warning instead of an occurrence table
+e<-1
+NA->FAD[i]
+NA->LAD[i]
+}
+}}else{#try to find taxa in list() object
 for(i in 1:length(taxa)){
 
 data[[paste0("sptab_",taxa[i])]][,c("max","min")]->data_#first see if there are species tables
@@ -957,6 +963,10 @@ min(data_)->LAD[i]
 cbind(FAD, LAD)->ages
 colnames(ages)<-c("FAD", "LAD")
 rownames(ages)<-taxa
+
+if(e==1){
+warning("Some occurrence tables could not be found, corresponding collumns contain NAs.")
+}
 
 return(ages)
 }
