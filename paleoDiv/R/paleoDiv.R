@@ -616,7 +616,7 @@ return(sptab)
 #' @param ids Vector or column of taxon names (used for matching taxon names in x). Defaults to table$tna
 #' @param max Vector or column containing maximum ages
 #' @param min Vector or column containing minimum ages
-#' @return A data.frame containing taxon names, maximum, minimum and mean ages, with ranges for the selected entries merged and superfluos entries removed (note that the first taxon indicated by x is kept as valid).
+#' @return A data.frame containing taxon names, maximum, minimum and mean ages, with ranges for the selected entries merged and superfluous entries removed (note that the first taxon indicated by x is kept as valid).
 #' @details This function is meant as an aid to manually editing species tables and remove synonyms or incorrect spellings of taxonomic name that result in an inflated number of distinct taxa being represented.
 #' @export synonymize
 #' @examples
@@ -852,14 +852,15 @@ return(tmp)}
 #'
 #' @param x A occurrence data.frame or character vector containing the variable to clean up (defaults to x$tna)
 #' @param remove Which values to remove. If NULL, a default set of commonly occurring character combinations is used ("n. gen.", "n. sp.", "cf.","aff.", punctuation, as well as double, leading and ending spaces). If user-defined, remove needs to be formatted as a character vector with the values to be removed as names, i.e. in the format of c("remove_this" = "", "removethistoo"="")
-#' @return A character vector containing the cleaned up taxonomic names.
+#' @param return.df A logical indicating whether to return the entire data.frame (if TRUE) or just the column of taxonomic names.
+#' @return A character vector containing the cleaned up taxonomic names or a dataframe with cleaned-up tna column (if return.df==TRUE).
 #' @importFrom stringr str_replace_all
 #' @export occ.cleanup
 #' @examples
 #' pdb("Coelophysoidea",full=TRUE)->coelo
 #' occ.cleanup(coelo)->coelo$tna
 
-occ.cleanup<-function(x,remove=NULL){
+occ.cleanup<-function(x,remove=NULL,return.df=FALSE){
 if(is.null(remove)){
 remove<-c("aff. "="","n. gen. "="","cf. "=""," $"="", "^ "="", "n. sp. "="","[[:punct:]]"="", "  "=" ")
 }
@@ -867,13 +868,20 @@ remove<-c("aff. "="","n. gen. "="","cf. "=""," $"="", "^ "="", "n. sp. "="","[[:
 if(is.data.frame(x)){
 length(levels(factor(x$tna)))->lev
 stringr::str_replace_all(x$tna, remove)->out
+
+if(return.df==TRUE){
+x$tna<-out
+}
+
 }else{
 length(levels(factor(x)))->lev
 stringr::str_replace_all(x, remove)->out
 }
 
 print(paste(lev, "factor levels reduced down to", length(levels(factor(out)))))
-return(out)
+
+if(return.df==T & is.data.frame(x)){return(x)}else{
+return(out)}
 
 }
 ##
@@ -1003,12 +1011,18 @@ NA->LAD[i]
 for(i in 1:length(taxa)){
 
 data[[paste0("sptab_",taxa[i])]][,c("max","min")]->data_#first see if there are species tables
-if(is.null(data_)){#if species tables were not found, look for occurrence tables
+
+if(is.null(data_) & !is.null(data[[taxa[i]]])){#if species tables were not found, look for occurrence tables
 data[[taxa[i]]][,c("eag","lag")]->data_
 }
+
+if(is.null(data_)){
+data_<-c(NA,NA)
+e<-1
+}
 #find and save minimum and maximum recorded taxon ages
-max(data_)->FAD[i]
-min(data_)->LAD[i]
+max(data_,na.rm=TRUE)->FAD[i]
+min(data_,na.rm=TRUE)->LAD[i]
 
 }
 }

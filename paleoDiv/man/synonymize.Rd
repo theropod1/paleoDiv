@@ -18,7 +18,7 @@ synonymize(x, table = NULL, ids = table$tna, max = table$max, min = table$min)
 \item{min}{Vector or column containing minimum ages}
 }
 \value{
-A data.frame containing taxon names, maximum, minimum and mean ages, with ranges for the selected entries merged and superfluos entries removed (note that the first taxon indicated by x is kept as valid).
+A data.frame containing taxon names, maximum, minimum and mean ages, with ranges for the selected entries merged and superfluous entries removed (note that the first taxon indicated by x is kept as valid).
 }
 \description{
 Combine selected entries in a taxon-range table to remove duplicates

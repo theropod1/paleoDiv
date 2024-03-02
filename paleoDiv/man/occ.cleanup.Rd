@@ -4,15 +4,17 @@
 \alias{occ.cleanup}
 \title{Clean up occurrence dataset by removing commonly used character combinations in the identified name that will result in different factor levels for the same taxon.}
 \usage{
-occ.cleanup(x, remove = NULL)
+occ.cleanup(x, remove = NULL, return.df = FALSE)
 }
 \arguments{
 \item{x}{A occurrence data.frame or character vector containing the variable to clean up (defaults to x$tna)}
 
 \item{remove}{Which values to remove. If NULL, a default set of commonly occurring character combinations is used ("n. gen.", "n. sp.", "cf.","aff.", punctuation, as well as double, leading and ending spaces). If user-defined, remove needs to be formatted as a character vector with the values to be removed as names, i.e. in the format of c("remove_this" = "", "removethistoo"="")}
+
+\item{return.df}{A logical indicating whether to return the entire data.frame (if TRUE) or just the column of taxonomic names.}
 }
 \value{
-A character vector containing the cleaned up taxonomic names.
+A character vector containing the cleaned up taxonomic names or a dataframe with cleaned-up tna column (if return.df==TRUE).
 }
 \description{
 Clean up occurrence dataset by removing commonly used character combinations in the identified name that will result in different factor levels for the same taxon.
