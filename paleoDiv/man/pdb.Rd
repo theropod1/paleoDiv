@@ -4,7 +4,7 @@
 \alias{pdb}
 \title{Download data from the paleobiology database.}
 \usage{
-pdb(taxon, interval = "all", what = "occs", full = F)
+pdb(taxon, interval = "all", what = "occs", full = FALSE)
 }
 \arguments{
 \item{taxon}{A taxon (base_name) for which to download records.}

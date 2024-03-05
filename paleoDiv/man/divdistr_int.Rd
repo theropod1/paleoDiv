@@ -4,7 +4,7 @@
 \alias{divdistr_int}
 \title{Count number of taxon records overlapping a specific time interval.}
 \usage{
-divdistr_int(x, table = NULL, ids = F, max = table$max, min = table$min)
+divdistr_int(x, table = NULL, ids = FALSE, max = table$max, min = table$min)
 }
 \arguments{
 \item{x}{A numeric vector of length 2 specifying the start and end (in ma) of the time interval in question.}

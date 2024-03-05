@@ -14,7 +14,7 @@ darken(x, add = 0, abs = NULL)
 \item{abs}{Value to substitute for the third hsv-channel. If set, this overrides the setting for parameter add. Can be a vector of length x, or a vector of any length if length(x)==1}
 }
 \value{
-A color value or vector of colour values of length x (or, if length(x)==1, the length of add or abs)
+A color value or vector of color values of length x (or, if length(x)==1, the length of add or abs)
 }
 \description{
 Darken or lighten colors by adding/subtracting to or hsv channel values

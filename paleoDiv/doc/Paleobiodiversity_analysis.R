@@ -82,7 +82,7 @@ axis(1,at=tsconv(seq(300,-50,-50),tree_archosauria), lab=seq(300,-50,-50), cex=0
 axis(2, at=c(500,1000)*0.005, lab=c(0,500))
 
 #add vertical lines marking major mass extinctions.
-abline(v=tsconv(c(252,201.3,66),tree_archosauria),lwd=2, col="grey90")
+abline(v=tsconv(c(252,201.3,66),tree_archosauria),lwd=2, col=add.alpha("black",0.3))
 
 mtext(side=3, cex=1.2,"paleoDiv::divdistr_()",col="darkgrey")
 
@@ -104,8 +104,29 @@ axis(1,at=tsconv(seq(300,-50,-50),tree_archosauria), lab=seq(300,-50,-50), cex=0
 axis(2, at=c(500,1000)*0.01, lab=c(0,500))
 
 #add vertical lines marking major mass extinctions.
-abline(v=tsconv(c(252,201.3,66),tree_archosauria),lwd=2, col="grey90")
+abline(v=tsconv(c(252,201.3,66),tree_archosauria),lwd=2, col=add.alpha("black",0.3))
 
 mtext(side=3, cex=1.2,"divDyn::divDyn()$divRT",col="darkgrey")
 
+
+## ----fig.height=5, fig.width=7------------------------------------------------
+phylo.spindles(phylo0=tree_archosauria$tip.label,occ=archosauria,col=add.alpha(ggcol(13)),ages=ages_archosauria,txt.y=.5, dscale=0.005,xlim=c(260,0),axis=F,tbmar=c(1.5,.5),txt.x=c(66,ages_archosauria[2:12,"LAD"],66))
+#add a timescale
+ts.stages(ylim=c(-1,0),alpha=0.8)
+ts.periods(names=T, ylim=c(-1,0),alpha=0)
+
+#add an x axis with custom tick positions:
+axis(1,at=seq(300,-50,-50), cex=0.75,col="grey30",col.lab="grey30")
+#add a short y axis serving as a scale bar
+axis(2, at=c(500,1000)*0.005, lab=c(0,500))
+
+#add vertical lines marking major mass extinctions.
+abline(v=c(252,201.3,66),lwd=2, col=add.alpha("black",0.3))
+
+mtext(side=3, cex=1.2,"Phylo.spindles without Phylogeny",col="darkgrey")
+
+## ----fig.height=5, fig.width=7------------------------------------------------
+ape::plot.phylo(tree_archosauria)
+
+phylo.spindles(phylo0=tree_archosauria,occ=archosauria,col=add.alpha(ggcol(13)),ages=ages_archosauria,txt.y=.5, dscale=0.005,xlim=c(260,0),axis=F,tbmar=c(1.5,.5),txt.x=c(66,ages_archosauria[2:12,"LAD"],66),add=T)
 

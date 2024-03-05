@@ -2,18 +2,18 @@
 % Please edit documentation in R/paleoDiv.R
 \name{ggcol}
 \alias{ggcol}
-\title{Replicate the standard colour scheme from ggplot2}
+\title{Replicate the standard color scheme from ggplot2}
 \usage{
 ggcol(n)
 }
 \arguments{
-\item{n}{Length of colour vector to return.}
+\item{n}{Length of color vector to return.}
 }
 \value{
 A character vector containing color hex codes.
 }
 \description{
-Replicate the standard colour scheme from ggplot2
+Replicate the standard color scheme from ggplot2
 }
 \examples{
 ggcol(3)

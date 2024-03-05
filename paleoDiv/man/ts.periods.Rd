@@ -7,14 +7,14 @@
 ts.periods(
   phylo = NULL,
   alpha = 1,
-  names = T,
+  names = TRUE,
   exclude = c("Quarternary"),
   col.txt = NULL,
   border = NA,
   ylim = 0.5,
   adj.txt = c(0.5, 0.5),
   txt.y = mean,
-  bw = F,
+  bw = FALSE,
   update = NULL
 )
 }

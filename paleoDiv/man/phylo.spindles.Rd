@@ -10,7 +10,7 @@ phylo.spindles(
   stat = divdistr_,
   prefix = "sptab_",
   ages = NULL,
-  xlimits = c(round(phylo0$root.time) - 1, 0),
+  xlimits = NULL,
   res = 1,
   weights = 1,
   dscale = 0.002,
@@ -20,17 +20,17 @@ phylo.spindles(
   lty = 1,
   cex.txt = 1,
   col.txt = add.alpha(col, 1),
-  axis = T,
-  labels = T,
+  axis = TRUE,
+  labels = TRUE,
   txt.y = 0.5,
-  txt.x = mean(xlimits),
+  txt.x = NULL,
   add = FALSE,
   tbmar = 0.2,
   smooth = 0
 )
 }
 \arguments{
-\item{phylo0}{A time-calibrated phylogenetic tree to plot}
+\item{phylo0}{A time-calibrated phylogenetic tree to plot with spindle diagrams, or a character vector of taxonomic names for which to plot spindle diagrams.}
 
 \item{occ}{Either a list()-object containing taxon-range tables for plotting diversity, or a matrix() or data.frame()-object that contains numerical plotting statistics. If the latter is provided, the default use of divdistr_() is overridden and the function will look for a column named "x" and columns matching the phylogeny tip.labels to plot the spindles.}
 
@@ -40,9 +40,9 @@ phylo.spindles(
 
 \item{ages}{Optional matrix with lower and upper age limits for each spindle, formatted like the output of tree.ages() (most commonly the same calibration matrix used to time-calibrate the tree)}
 
-\item{xlimits}{Limits for plotting the phylogeny on the x axis.}
+\item{xlimits}{Limits for plotting the on the x axis.}
 
-\item{res}{Temporal resolution of diversity estimation}
+\item{res}{Temporal resolution of diversity estimation (if occ is a matrix or data.frame containing plotting statistics, this is ignored)}
 
 \item{weights}{Weights for diversity estimation. Must have the same length as the range of xlimits divided by res. For details, see divdistr_()}
 
@@ -74,12 +74,15 @@ phylo.spindles(
 
 \item{smooth}{Smoothing parameter to be passed on to divdistr_()}
 }
+\value{
+A plotted phylogeny with spindle diagrams plotted at each of its terminal branches.
+}
 \description{
 Plots a phylogenetic tree with spindle-diagrams, optimized for showing taxonomic diversity.
 }
 \details{
-The phylo.spindles() function allows the plotting of a phylogeny with spindle diagrams at each of its terminal branches. Various data can be represented (e.g. disparity, abundance, various diversity measures, such as those output by the divDyn package, etc.) depending on the settings for occ and stat, but the function is optimized to plot the results of divdistr_() and does do by default.
-If another function is used as an argument to stat, it has to be able to take occ as its argument and return a vector of the same length as range(xlimits)/res to be plotted on the phylogeny. If occ is a list() object containing multiple dataframes, occurrence datasets of taxon range tables are automatically converted to work with abdistr_() or divdistr_() respectively.
+The phylo.spindles() function allows the plotting of a phylogeny with spindle diagrams at each of its terminal branches. Various data can be represented (e.g. disparity, abundance, various diversity measures, such as those output by the divDyn package, etc.) depending on the settings for occ and stat, but the function is optimized to plot the results of divdistr_() and does so by default.
+If another function is used as an argument to stat, it has to be able to take the sequence resulting from xlimits and res as its first, and occ as its 'table' argument and return a vector of the same length as range(xlimits)/res to be plotted. If occ is a list() object containing multiple dataframes, occurrence datasets or taxon range tables are automatically converted to work with abdistr_() or divdistr_() respectively (if the plot contains a phylogeny). If occ is a matrix or data.frame, the x values must already be converted (e.g. using tsconv()) to match the phylogeny.
 }
 \examples{
 data(archosauria)

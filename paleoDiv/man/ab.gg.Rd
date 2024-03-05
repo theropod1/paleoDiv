@@ -29,5 +29,4 @@ pdb.autodiv(c("Coelophysoidea","Stegosauria"))->occ
 ab.gg(data=occ, taxa=c("Coelophysoidea","Stegosauria"), agerange=c(252,0),precision_ma=1)->dino
 library(ggplot2)
 ggplot(data=dino, aes(x=tax, y=ma, col=tax))+ylim(252,0)+geom_violin(scale="count")
-ggplot(data=dino, aes(col=tax, x=ma))+xlim(252,0)+geom_density(adjust=0.5)
 }

@@ -12,7 +12,7 @@ viol(
   dscale = 1,
   cutoff = range(x),
   horiz = TRUE,
-  add = T,
+  add = TRUE,
   lim = cutoff,
   xlab = "",
   ylab = "",

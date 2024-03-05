@@ -1,7 +1,13 @@
+# paleoDiv 0.2.0 (Release date: 2024-03-05)
+==============
+
+* fixed description, documentation and message output
+* improved behavior of phylo.spindles in terms; now allows plotting without a phylogeny
+
 # paleoDiv 0.1.1 (Release date: 2024-03-02)
 ==============
 
-* improvement to the behaviour of tree.ages() if data is not found and added option for occ.cleanup() to return whole data.frame instead of mere collumn
+* improvement to the behavior of tree.ages() if data is not found and added option for occ.cleanup() to return whole data.frame instead of mere collumn
 
 # paleoDiv v0.1.0 (Release date: 2024-03-01)
 ==============
