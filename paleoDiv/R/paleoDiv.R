@@ -719,7 +719,8 @@ return(tmp)
 #'
 #' @param x A numeric vector giving the times (in ma) at which to determine the number of overlapping records.
 #' @param table An occurrence or collection dataset
-#' @param ab.val Abundance value to be used. Default is table$abund_value. If NULL (e.g. because this column does not exist) or NA, each occurrence is treated as representing one specimen
+#' @param ab.val Abundance value to be used. Default is table$abund_value. If set to 1, each occurrence is treated as representing one specimen. If NULL (e.g. because this column does not exist) or NA, each occurrence is treated as the number of specimens specified under ab.val.na
+#' @param ab.val.na Value to substitute for missing entries in abundance values. Defaults to 1. Either a single numeric or a function to be applied to all non-missing entries of ab.val (e.g. mean()  or median()).
 #' @param smooth The smoothing margin, in units of ma. Corresponds to the plusminus parameter of rmeana(). Defaults to 0, i.e. no smoothing (beyond the resolution determined by the resolution of x)
 #' @param max Vector or column containing maximum age of each occurrence or collection
 #' @param min Vector or column containing minimum age of each occurrence or collection
@@ -730,7 +731,7 @@ return(tmp)
 #' data(archosauria)
 #' abdistr_(x=c(170:120), table=archosauria$Stegosauria)
 
-abdistr_<-function(x, table=NULL, ab.val=table$abund_value, smooth=0, max=table$eag, min=table$lag,w=rep(1,length(x))){
+abdistr_<-function(x, table=NULL, ab.val=table$abund_value,ab.val.na=1, smooth=0, max=table$eag, min=table$lag,w=rep(1,length(x))){
 
     abdistr<-function(x,table=NULL, ab.val=table$abund_value, max=table$eag, min=table$lag){
 
@@ -739,7 +740,12 @@ abdistr_<-function(x, table=NULL, ab.val=table$abund_value, smooth=0, max=table$
 
     if(length(ab.val)>0){
     for(i in 1:length(ab.val)){
-    if(is.na(ab.val[i])){ab.val[i]<-1}
+    if(is.na(ab.val[i])){
+    if(is.numeric(ab.val.na)){
+    ab.val[i]<-ab.val.na
+    }else{
+    ab.val[i]<-ab.val.na(ab.val[!is.na(ab.val)])}
+    }
     }}#make sure that abundance values exist
     
     which(as.numeric(min)<=x)->a
