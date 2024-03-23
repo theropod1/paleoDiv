@@ -1,3 +1,11 @@
+# paleoDiv 0.2.4
+* added better customizability for phylo.spindles (WIP)
+    Two new parameters for controlling y locations for plotting and text x alignment
+* standard value 0 for pos parameter of viol
+* fixed bug in setting of cutoff values if no ages are provided
+* fixed abdistr_() function; previous version erraneously failed to take into account the ab.val data in the calculation of abundance because of a forgotten # sign
+* improved handling of spindle limits in phylo.spindles (cutoff variable) if no age data are provided
+
 # paleoDiv 0.2.3 (Release date: 2024-03-08)
 ==============
 * fixed vignette
