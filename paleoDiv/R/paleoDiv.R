@@ -308,13 +308,14 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 #' @param exclude Character vector listing periods for which to not plot the names, if names==TRUE
 #' @param col.txt Color(s) to use for labels.
 #' @param border Color to use for the border of the timescale
-#' @param ylim Setting for height of the timescale. Can either be one single value, in which case the function attempts to use the lower limit of the currently plotted phylogeny, or a vector of length 2 containing the lower and upper limits of the timescale.
+#' @param ylim Setting for height of the timescale. Can either be one single value giving the height of the timescale, in which case the function attempts to use the lower limit of the current plot as the lower margin, or a vector of length 2 containing the lower and upper limits of the timescale.
 #' @param adj.txt Numeric vector of length==2 giving horizontal and vertical label alignment (defaults to centered, i.e. 0.5 for both values)
 #' @param txt.y Function to use to determine the vertical text position (defaults to mean, i.e. centered) 
 #' @param bw Logical whether to plot in black and white (defaults to FALSE). If TRUE, time scale is drawn with a white background
 #' @param update Character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named periods, bottom, top and col, giving the period names, start time in ma, end time in ma and a valid color value, respectively.
 #' @return Plots a timescale on the currently active plot.
 #' @importFrom graphics text
+#' @importFrom graphics par
 #' @importFrom utils read.csv
 #' @importFrom ape plot.phylo
 #' @export ts.periods
@@ -323,7 +324,7 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 #' ape::plot.phylo(tree_archosauria)
 #' ts.periods(tree_archosauria, alpha=0.5)
 
-ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quarternary"),col.txt=NULL,border=NA,ylim=0.5,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL){
+ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quarternary"),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL){
   ## Data for geological periods
   
   if(!is.null(update)){
@@ -344,12 +345,18 @@ periods$end<-tsconv(periods$end,phylo)
 
   
   if(is.null(col.txt)){col.txt<-periods$col}#set text color, is unset
-
-if(length(ylim)==1 & !is.null(phylo)){
-lastPP <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
-c(min(lastPP$y.lim),ylim)->ylim
-}else if(length(ylim)==1){ylim<-c(0,ylim)}
+#regulate limits
+if(is.null(ylim)){
+ylim <- par("usr")[3:4]
+ylim[2] <- ylim[1]+diff(ylim)/20
+}
   
+if(length(ylim)==1){
+lastPP <- par("usr")[3:4]#get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
+c(min(lastPP),min(lastPP)+ylim)->ylim
+}
+
+#loop through polygons
   for (i in 1:nrow(periods)) {
     if(bw!=TRUE){polygon(
       x=c(periods$start[i], periods$end[i], periods$end[i], periods$start[i]),
@@ -390,13 +397,14 @@ c(min(lastPP$y.lim),ylim)->ylim
 #' @param names Logical indicating whether to plot stage names (defaults to FALSE)
 #' @param col.txt Color(s) to use for labels.
 #' @param border Color to use for the border of the timescale
-#' @param ylim Setting for height of the timescale. Can either be one single value, in which case the function attempts to use the lower limit of the currently plotted phylogeny, or a vector of length 2 containing the lower and upper limits of the timescale.
+#' @param ylim Setting for height of the timescale. Can either be one single value giving the height of the timescale, in which case the function attempts to use the lower limit of the current plot as the lower margin, or a vector of length 2 containing the lower and upper limits of the timescale.
 #' @param adj.txt Numeric vector of length==2 giving horizontal and vertical label alignment (defaults to centered, i.e. 0.5 for both values)
 #' @param txt.y Function to use to determine the vertical text position (defaults to mean, i.e. centered) 
 #' @param bw Logical whether to plot in black and white (defaults to FALSE). If TRUE, time scale is drawn with a white background
 #' @param update Character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named stage, bottom, top and col, giving the stage names, start time in ma, end time in ma and a valid color value, respectively.
 #' @return Plots a timescale on the currently active plot.
 #' @importFrom graphics text
+#' @importFrom graphics par
 #' @importFrom utils read.csv
 #' @importFrom ape plot.phylo
 #' @export ts.stages
@@ -407,7 +415,7 @@ c(min(lastPP$y.lim),ylim)->ylim
 #' ts.periods(tree_archosauria, alpha=0)
 
 
-ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,col.txt=NULL,border=NA,ylim=0.5,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL){
+ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL){
   ##Data for geological periods
   if(!is.null(update)){
   read.csv(update)->ts #use this to manually update time scale
@@ -425,11 +433,23 @@ intervals$end<-tsconv(intervals$end,phylo)
   if(is.null(col.txt)){
     col.txt<-intervals$col}
     
-if(length(ylim)==1 & !is.null(phylo)){
-lastPP <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
-c(min(lastPP$y.lim),ylim)->ylim
-}else if(length(ylim)==1){ylim<-c(0,ylim)}
+#if(length(ylim)==1 & !is.null(phylo)){
+#lastPP <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
+#c(min(lastPP$y.lim),ylim)->ylim
+#}else if(length(ylim)==1){ylim<-c(0,ylim)}
 
+#regulate limits
+if(is.null(ylim)){
+ylim <- par("usr")[3:4]
+ylim[2] <- ylim[1]+diff(ylim)/20
+}
+  
+if(length(ylim)==1){
+lastPP <- par("usr")[3:4]#get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
+c(min(lastPP),min(lastPP)+ylim)->ylim
+}
+
+#loop through polygons
   for (i in 1:nrow(intervals)) {
     ###
     if(bw!=TRUE){polygon(
@@ -1106,6 +1126,7 @@ return(sptab_)
 #' @param add Logical indicating whether to add to an existing plot, in which case only the spindles are plotted on top of an existing phylogeny, or not, in which case the phylogeny is plotted along with the spindles.
 #' @param tbmar Top and bottom margin around the plot. Numeric of either length 1 or 2
 #' @param smooth Smoothing parameter to be passed on to divdistr_()
+#' @param italicize Character or numeric vector specifying which labels to italicize, if any.
 #' @return A plotted phylogeny with spindle diagrams plotted at each of its terminal branches.
 #' @details
 #' The phylo.spindles() function allows the plotting of a phylogeny with spindle diagrams at each of its terminal branches. Various data can be represented (e.g. disparity, abundance, various diversity measures, such as those output by the divDyn package, etc.) depending on the settings for occ and stat, but the function is optimized to plot the results of divdistr_() and does so by default.
@@ -1120,7 +1141,7 @@ return(sptab_)
 #' phylo.spindles(tree_archosauria,occ=archosauria,dscale=0.005,ages=ages_archosauria,txt.x=66)
 #' phylo.spindles(tree_archosauria,occ=diversity_table,dscale=0.005,ages=ages_archosauria,txt.x=66)
 
-phylo.spindles<-function(phylo0, occ, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=0, add=FALSE,tbmar=0.2,smooth=0){
+phylo.spindles<-function(phylo0, occ, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=0, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
 
 if(length(tbmar)==1){tbmar<-rep(tbmar,2)}#if only one value is given for tbmar, duplicate it. Otherwise, first value is bottom, second top
 if(inherits(phylo0,"phylo")){#setting for phylogenetic tree
@@ -1136,8 +1157,6 @@ xlimits<-rev(range(ages))}
 
 }else{stop("phylo0 must be either a phylogenetic tree of a character vector containing taxon names.")}
 
-if(is.null(txt.x)){txt.x<-mean(xlimits)}
-
 #set y positions at which to plot, if unspecified
 if(is.null(pos)){
 pos<-c(1:length(taxsel))
@@ -1145,9 +1164,23 @@ pos<-c(1:length(taxsel))
 if(length(pos)<length(taxsel)){
 pos<-c(1:length(taxsel))
 }
-#set y axis adjustment, if unspecified
+
+
+if(labels==TRUE){#set plot info for labels
+
+if(length(txt.y)<length(taxsel)){
+if(is.null(txt.y)){txt.y<-0.5}
+txt.y<-rep(txt.y, length(taxsel))[1:length(taxsel)]
+}#repeat text y alignment
+if(length(txt.x)<length(taxsel)){
+if(is.null(txt.x)){txt.x<-mean(xlimits)}
+txt.x<-rep(txt.x, length(taxsel))[1:length(taxsel)]
+}#repeat text x coordingates
 if(length(adj.x)<length(taxsel)){
+if(is.null(adj.x)){adj.x<-0}
 adj.x<-rep(adj.x,length(taxsel))[1:length(taxsel)]
+}#set y axis adjustment, if unspecified
+
 }
 
 
@@ -1172,10 +1205,20 @@ if(is.null(plot1)){
 plot1$x.lim<-xlimits
 }
 
-#colors
+#repeat colors into vectors, if needed
 col->col_
+if(length(col_)<length(taxsel)){
+col_<-rep(col_,length(taxsel))[1:length(taxsel)]
+}
+
 fill->fill_
+if(length(fill_)<length(taxsel)){
+fill_<-rep(fill_,length(taxsel))[1:length(taxsel)]
+}
 col.txt->col.txt_
+if(length(col.txt_)<length(taxsel)){
+col.txt_<-rep(col.txt_,length(taxsel))[1:length(taxsel)]
+}
 
 #repeat weights
 if(length(weights)==1){
@@ -1202,21 +1245,21 @@ if(inherits(phylo0,"phylo") & exists("cutoff")){phylo0$root.time-cutoff->cutoff}
 #end setting of spindle limits
 
 
-##vary colors, if desired
-if(length(col_)==length(taxsel)){
+##vary colors
+#if(length(col_)>=length(taxsel)){
 col<-col_[i]
-}
-if(length(fill_)==length(taxsel)){
+#}
+#if(length(fill_)>=length(taxsel)){
 fill<-fill_[i]
-}
-if(length(col.txt_)==length(taxsel)){
+#}
+#if(length(col.txt_)>=length(taxsel)){
 col.txt<-col.txt_[i]
-}
+#}
 
 #set weights
 if(is.matrix(weights)){
 w<-weights[,i]
-}else if(length(weights)==length(seq(min(plot1$x.lim),max(plot1$x.lim),abs(res)))){
+}else{ #if(length(weights)==length(seq(min(plot1$x.lim),max(plot1$x.lim),abs(res)))){
 w<-weights
 }
 
@@ -1260,25 +1303,22 @@ viol(occ[,"x"], pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=f
 
 }
 
-#convert coordinates if phylogeny is being plotted
-if(inherits(phylo0,"phylo")){
-
-}
+#if(inherits(phylo0,"phylo")){}#coordinate conversion if phylo object is being plotted
 
 if(labels==TRUE){#add labels
-if(length(txt.y)==1){txt.y<-rep(txt.y, length(taxsel))}
 
-if(length(txt.x)>1){#if a vector of x values for labels is provided
+
     if(length(which(names(txt.x)==taxsel[i]))==1){
-    which(names(txt.x)==taxsel[i])->j
-    text(x=txt.x[j],y=pos[i],adj=c(adj.x[i],txt.y[i]), taxsel[i], cex=cex.txt,col=col.txt)
-    }else{
-    text(x=txt.x[i],y=pos[i],adj=c(adj.x[i],txt.y[i]), taxsel[i], cex=cex.txt,col=col.txt)}
-}else{
-text(x=txt.x,y=pos[i],adj=c(adj.x[i],txt.y[i]), taxsel[i], cex=cex.txt,col=col.txt)}
-}
+    which(names(txt.x)==taxsel[i])->j    
+    }else{j<-i}
+    
+    if(taxsel[i] %in% italicize | i %in% italicize){
+    text(x=txt.x[j],y=pos[i],adj=c(adj.x[i],txt.y[i]), bquote(italic(.(taxsel[i]))), cex=cex.txt,col=col.txt)
+    }else{text(x=txt.x[j],y=pos[i],adj=c(adj.x[i],txt.y[i]), taxsel[i], cex=cex.txt,col=col.txt)}
+    
+}#end labels
 
-}#end loop
+}##end loop through taxa
 
 
 if(axis==TRUE){#add time axis
@@ -1291,7 +1331,6 @@ axis(1,at=1-(ticks-phylo0$root.time), lab=ticks)}else{axis(1)}
 
 }
 ##
-
 
 
 ##Function div.gg

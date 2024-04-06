@@ -1,4 +1,11 @@
-# paleoDiv 0.2.4
+# paleoDiv 0.2.6 (Release date: 2024-04-05)
+* improved automatic dimension settings for ts.periods() and ts.stages()
+
+# paleoDiv 0.2.5 (Release date: 2024-03-24)
+* added parameter 'italicize' to phylo.spindles, allowing automatic italicization of taxa given as indices or taxon names
+* improved color vector handling by phylo.spindles (colour vectors that are too short or long are now cycled or abridged automatically)
+
+# paleoDiv 0.2.4 (Release date: 2024-03-23)
 * added better customizability for phylo.spindles (WIP)
     Two new parameters for controlling y locations for plotting and text x alignment
 * standard value 0 for pos parameter of viol

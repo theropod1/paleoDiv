@@ -28,7 +28,8 @@ phylo.spindles(
   adj.x = 0,
   add = FALSE,
   tbmar = 0.2,
-  smooth = 0
+  smooth = 0,
+  italicize = character()
 )
 }
 \arguments{
@@ -79,6 +80,8 @@ phylo.spindles(
 \item{tbmar}{Top and bottom margin around the plot. Numeric of either length 1 or 2}
 
 \item{smooth}{Smoothing parameter to be passed on to divdistr_()}
+
+\item{italicize}{Character or numeric vector specifying which labels to italicize, if any.}
 }
 \value{
 A plotted phylogeny with spindle diagrams plotted at each of its terminal branches.
