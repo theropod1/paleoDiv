@@ -1008,12 +1008,13 @@ return(occ)
 
 
 ##Function tree.ages
-#'Automatically build matrix for time-calibration of phylogenetic trees using occurrence data
+#'Automatically build matrix for time-calibration of phylogenetic trees using occurrence data.
 #'
-#' @param phylo0 (Optional) Object of class=="phylo" from which to draw taxa to include in calibration matrix
+#' @param phylo0 Either an object of class phylo, or a character vector containing taxon names for building the matrix
 #' @param data Optional list()-object containing either taxon-range tables or occurrence datasets for all taxa. If NULL, data will be automatically downloaded via the pdb()-function
-#' @param taxa Taxa to include in calibration matrix, defaults to phylo0$tip.label
+#' @param taxa Deprecated argument; vector containing taxa to include in calibration matrix (can now be provided directly as phylo0)
 #' @return A two-column matrix containing earliest and latest occurrences for each taxon in taxa, with taxon names as row names
+#' @details tree.ages works best for getting occurrence dates for higher-level taxa (genus-level and up) that can be used as a base_name in a call to the paleobiology database and will return NAs for species names (or any other taxon that cannot be found in the paleobiology database or the provided list object). For a function optimized to recover taxon ranges for genera and species, see tree.ages.spp().  It is highly recommended to manually inspect the resulting table for accuracy.
 #' @importFrom utils read.csv
 #' @export tree.ages
 #' @examples
@@ -1021,7 +1022,17 @@ return(occ)
 #' data(tree_archosauria)
 #' tree.ages(tree_archosauria,data=archosauria)->ages
 
-tree.ages<-function(phylo0=NULL, data=NULL, taxa=phylo0$tip.label){
+tree.ages<-function(phylo0=NULL, data=NULL, taxa=NULL){
+if(!is.null(taxa)){
+message("The parameter \'taxa\' was deprecated in paleoDiv v. 0.2.7., you can now directly provide your taxon vector as phylo0-parameter")
+}
+
+if(inherits(phylo0,"phylo") & is.null(taxa)){#setting for phylogenetic tree
+phylo0$tip.label->taxa
+}else if(is.character(phylo0) & is.null(taxa)){
+taxa<-phylo0
+}
+
 FAD<-numeric(length(taxa))
 LAD<-numeric(length(taxa))
 e<-0
@@ -1042,20 +1053,21 @@ NA->LAD[i]
 }}else{#try to find taxa in list() object
 for(i in 1:length(taxa)){
 
-data[[paste0("sptab_",taxa[i])]][,c("max","min")]->data_#first see if there are species tables
+data[[paste0("sptab_",taxa[i])]][,c("max","min")]->data_#first see if there are taxon-range tables
 
-if(is.null(data_) & !is.null(data[[taxa[i]]])){#if species tables were not found, look for occurrence tables
+if(is.null(data_) & !is.null(data[[taxa[i]]])){#if taxon-range tables were not found, look for occurrence datasets
 data[[taxa[i]]][,c("eag","lag")]->data_
 }
 
-if(is.null(data_)){
-data_<-c(NA,NA)
+if(is.null(data_) | length(data_)==0){
+FAD[i]<-NA
+LAD[i]<-NA
 e<-1
-}
+}else{
 #find and save minimum and maximum recorded taxon ages
 max(data_,na.rm=TRUE)->FAD[i]
 min(data_,na.rm=TRUE)->LAD[i]
-
+}
 }
 }
 
@@ -1069,6 +1081,165 @@ warning("Some occurrence tables could not be found, corresponding collumns conta
 }
 
 return(ages)
+}
+##
+
+##Function tree.ages.spp
+#'Automatically build matrix for time-calibration of phylogenetic trees using occurrence data.
+#'
+#' @param phylo0 Either an object of class phylo, or a character vector containing taxon names for building the matrix
+#' @param data A higher-level taxon name to get data for in the paleobiology database, or a data.frame containing a species table containing entries for the taxa in question.
+#' @return A two-column matrix containing earliest and latest occurrences for each taxon in taxa, with taxon names as row names
+#' @details tree.ages looks for the taxon names in the tna collumn of a taxon-range table (as produced by mk.sptab()), so it will only recover ages for taxa that can be found there. For a function optimized for higher-level taxa that might not be represented in such a table, see tree.ages().  It is highly recommended to manually inspect the resulting table for accuracy.
+#' @importFrom utils read.csv
+#' @export tree.ages.spp
+#' @examples
+#' data(archosauria)
+#' data(tree_archosauria)
+#' tree.ages.spp(tree_archosauria,data=archosauria$sptab_Ornithopoda)->ages
+
+tree.ages.spp<-function(phylo0, data){
+
+ if(is.character(data)){
+ 
+ paleoDiv::pdb.autodiv(data)->dat
+ dat[data]->data
+ do.call(rbind, data)->data
+ if(ncol(data)>1){
+ pdb.union(data)->data
+ mk.sptab(data)->data
+}
+ }
+
+ if(ncol(data)<3){stop("No valid data could be found, perhaps the taxon you entered cannot be found on the paleobiology database.")}
+ if(exists("data$tna") & exists("data$max") & exists("data$min")){stop("No valid data could be found, perhaps the taxon you entered cannot be found on the paleobiology database.")}
+ 
+ if(inherits(phylo0, "phylo")){
+ phylo0$tip.label->tips
+ }else{phylo0->tips}
+ 
+ matrix(nrow=length(tips), ncol=2)->ages
+ colnames(ages)<-c("FAD","LAD")
+ rownames(ages)<-tips
+ 
+ gsub("_"," ", tips)->tips
+ 
+ missing<-character()
+ print(length(missing))
+ 
+ for(i in 1:length(tips)){#loop through taxa and fill in range table
+ #print(tips[i])
+ w<-numeric()
+ if(tips[i]%in%data$tna){
+ which(data$tna==tips[i])->w
+ }else if(length(grep(tips[i], data$tna))>0){
+ grep(tips[i], data$tna)->w
+ }
+ 
+ if(length(w)>0){
+ max(data[w,"max"])->FAD
+ min(data[w,"min"])->LAD
+
+ ages[i,"FAD"]<-FAD
+ ages[i,"LAD"]<-LAD
+ }else{
+ ages[i,"FAD"]<-NA
+ ages[i,"LAD"]<-NA
+  if(length(missing)==0){tips[i]->missing}else{c(missing, tips[i])->missing}
+ } 
+ 
+ }#end loop
+ 
+ if(length(missing)>0){
+  message(length(missing), " taxa could not be found, please complete missing values in age matrix manually!")
+  
+	listout<-function(x,quotes=T){
+if(is.numeric(x)){
+x_<-x[1]
+}else{
+x_<-paste0("'",x[1],"'")}
+
+if(length(x)>1){
+for(i in 2:length(x)){
+if(is.numeric(x)){
+paste0(x_,", ",x[i])->x_
+}else{
+paste0(x_,", ", "'",x[i],"'")->x_}
+}}
+
+if(quotes==F | is.numeric(x)){
+gsub("'","",x_)->x_
+gsub(" ","",x_)->x_
+}
+
+return(x_)
+}
+  
+  message("missing taxa: ",listout(missing))
+  message(length(missing),missing)
+ }
+ 
+ return(ages)
+ }
+ ##
+ 
+##Function tree.age.combine
+#' Combine two calibration matrixes and fill in NA values in one with values from another
+#'
+#' @param ages0 First matrix, NA values in which to replace with values from second matrix
+#' @param ages1 matrix from which to take replacement values
+#' @return A two-column matrix containing earliest and latest occurrences for each taxon in taxa, with taxon names as row names
+#' @details tree.age.combine builds the union of two calibration matrices if some of the values in one of them are NAs. If exact matches for some entries cannot be found, a relaxed search matching only the first word (i.e. usually the genus name) in each taxon name is run, in order to fill in as much of the age matrix as possible with non-NA values. It is highly recommended to manually inspect the resulting table for accuracy.
+#' @importFrom utils read.csv
+#' @export tree.age.combine
+#' @examples
+#' data(archosauria)
+#' data(tree_archosauria)
+#' tree.ages.spp(tree_archosauria,data=archosauria$sptab_Ornithopoda)->ages_A
+#' tree.ages.spp(tree_archosauria,data=archosauria$sptab_Allosauroidea)->ages_B
+#' tree.age.combine(ages_A,ages_B)->ages
+
+tree.age.combine<-function(ages0,ages1){
+
+rownames(ages0)->orownames
+
+gsub("_", " ", rownames(ages0))->rownames(ages0)
+
+for(i in 1:nrow(ages0)){
+
+if(is.na(ages0[i,1])){
+
+which(rownames(ages1)==rownames(ages0)[i])->w
+if(length(w)>0){
+ages1[w,1]->ages0[i,1]
+}else{
+
+which(stringr::word(rownames(ages1),1)==stringr::word(rownames(ages0)[i],1))->w
+if(length(w)>0){
+ages1[w,1]->ages0[i,1]
+}
+}
+}
+
+if(is.na(ages0[i,2])){
+which(rownames(ages1)==rownames(ages0)[i])->w
+if(length(w)>0){
+ages1[w,2]->ages0[i,2]
+}else{
+which(stringr::word(rownames(ages1),1)==stringr::word(rownames(ages0)[i],1))->w
+if(length(w)>0){
+ages1[w,2]->ages0[i,2]
+}
+}
+}
+
+
+}
+
+rownames(ages0)<-orownames
+
+return(ages0)
+
 }
 ##
 

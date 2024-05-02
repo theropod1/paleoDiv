@@ -1,3 +1,6 @@
+# paleoDiv (development version)
+* added two new functions, tree.ages.spp() and tree.age.combine() to facilitate building matrices for time calibration of phylogenies
+
 # paleoDiv 0.2.6 (Release date: 2024-04-05)
 * improved automatic dimension settings for ts.periods() and ts.stages()
 
