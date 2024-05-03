@@ -1,4 +1,7 @@
-# paleoDiv (development version)
+# paleoDiv 0.3.1 (Release date: 2024-05-03)
+* patch for bug in tree.age.combine() (issue with underscores in taxon names, now automatically removed)
+
+# paleoDiv 0.3.0 (Release date: 2024-05-02)
 * added two new functions, tree.ages.spp() and tree.age.combine() to facilitate building matrices for time calibration of phylogenies
 
 # paleoDiv 0.2.6 (Release date: 2024-04-05)
@@ -9,7 +12,7 @@
 * improved color vector handling by phylo.spindles (colour vectors that are too short or long are now cycled or abridged automatically)
 
 # paleoDiv 0.2.4 (Release date: 2024-03-23)
-* added better customizability for phylo.spindles (WIP)
+* added better customizability for phylo.spindles
     Two new parameters for controlling y locations for plotting and text x alignment
 * standard value 0 for pos parameter of viol
 * fixed bug in setting of cutoff values if no ages are provided

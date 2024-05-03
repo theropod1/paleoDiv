@@ -1024,7 +1024,7 @@ return(occ)
 
 tree.ages<-function(phylo0=NULL, data=NULL, taxa=NULL){
 if(!is.null(taxa)){
-message("The parameter \'taxa\' was deprecated in paleoDiv v. 0.2.7., you can now directly provide your taxon vector as phylo0-parameter")
+message("The parameter \'taxa\' has been deprecated in paleoDiv v. 0.3.0., you can now directly provide your taxon vector using the phylo0-parameter")
 }
 
 if(inherits(phylo0,"phylo") & is.null(taxa)){#setting for phylogenetic tree
@@ -1176,8 +1176,7 @@ return(x_)
 }
   
   message("missing taxa: ",listout(missing))
-  message(length(missing),missing)
- }
+  }
  
  return(ages)
  }
@@ -1204,6 +1203,7 @@ tree.age.combine<-function(ages0,ages1){
 rownames(ages0)->orownames
 
 gsub("_", " ", rownames(ages0))->rownames(ages0)
+gsub("_", " ", rownames(ages1))->rownames(ages1)
 
 for(i in 1:nrow(ages0)){
 
