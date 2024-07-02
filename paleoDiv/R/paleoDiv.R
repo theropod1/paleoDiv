@@ -1279,7 +1279,7 @@ return(sptab_)
 #' @param prefix Prefix for taxon-range tables in occ. Defaults to "sptab_"
 #' @param pos Position at which to draw spindles. If NULL (default), then spindles are drawn at c(1:n) where n is the number of taxa in phylo0.
 #' @param ages Optional matrix with lower and upper age limits for each spindle, formatted like the output of tree.ages() (most commonly the same calibration matrix used to time-calibrate the tree)
-#' @param xlimits Limits for plotting the on the x axis.
+#' @param xlimits Limits for plotting on the x axis.
 #' @param res Temporal resolution of diversity estimation (if occ is a matrix or data.frame containing plotting statistics, this is ignored)
 #' @param weights Weights for diversity estimation. Must have the same length as the range of xlimits divided by res. For details, see divdistr_()
 #' @param dscale Scale value of the spindles on the y axis. Should be adjusted manually to optimize visibility of results.
@@ -1292,8 +1292,8 @@ return(sptab_)
 #' @param axis Logical indicating whether to plot (temporal) x axis (defaults to TRUE)
 #' @param labels Logical indicating whether to plot tip labels of phylogeny (defaults to TRUE)
 #' @param txt.y y axis alignment of tip labels
-#' @param txt.x x coordinates for plotting tip labels. Can be a single value applicable to all labels, or a vector of the same length as phylo0$tip.label
-#' @param adj.x Numeric value giving alignment on x axis, defaults to 0 (left-aligned) but can also be 0.5 (centered) or 1 (right-aligned).
+#' @param txt.x x coordinates for plotting tip labels. Can be a single value applicable to all labels, or a vector of the same length as phylo0$tip.label. If NULL (default), the right margin of the plot is used with right-hand alignment for the text.
+#' @param adj.x Numeric value giving alignment on x axis. If NULL (default) this defaults to 0 (left-aligned) but can also any other adjustment value (e.g. 0.5 for centered, 1 for right-aligned).
 #' @param add Logical indicating whether to add to an existing plot, in which case only the spindles are plotted on top of an existing phylogeny, or not, in which case the phylogeny is plotted along with the spindles.
 #' @param tbmar Top and bottom margin around the plot. Numeric of either length 1 or 2
 #' @param smooth Smoothing parameter to be passed on to divdistr_()
@@ -1312,7 +1312,7 @@ return(sptab_)
 #' phylo.spindles(tree_archosauria,occ=archosauria,dscale=0.005,ages=ages_archosauria,txt.x=66)
 #' phylo.spindles(tree_archosauria,occ=diversity_table,dscale=0.005,ages=ages_archosauria,txt.x=66)
 
-phylo.spindles<-function(phylo0, occ, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=0, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
+phylo.spindles<-function(phylo0, occ, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=NULL, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
 
 if(length(tbmar)==1){tbmar<-rep(tbmar,2)}#if only one value is given for tbmar, duplicate it. Otherwise, first value is bottom, second top
 if(inherits(phylo0,"phylo")){#setting for phylogenetic tree
@@ -1324,9 +1324,19 @@ xlimits<-c(round(phylo0$root.time)-1,0)}
 }else if(is.character(phylo0)){
 taxsel<-phylo0#settings for taxonomic list
 if(!is.null(ages) & is.null(xlimits)){
-xlimits<-rev(range(ages))}
+xlimits<-rev(range(ages))
 
-}else{stop("phylo0 must be either a phylogenetic tree of a character vector containing taxon names.")}
+}else if(is.null(xlimits)){
+r<-numeric()
+for(i in 1:length(taxsel)){
+paste0(prefix,taxsel[i])->s
+occ[[s]]->o
+c(r,range(c(o$min, o$max)))->r
+}
+rev(range(r))->xlimits
+}
+
+}else{stop("phylo0 must be either a phylogenetic tree or a character vector containing taxon names.")}
 
 #set y positions at which to plot, if unspecified
 if(is.null(pos)){
@@ -1339,16 +1349,25 @@ pos<-c(1:length(taxsel))
 
 if(labels==TRUE){#set plot info for labels
 
-if(length(txt.y)<length(taxsel)){
 if(is.null(txt.y)){txt.y<-0.5}
+if(length(txt.y)<length(taxsel)){
 txt.y<-rep(txt.y, length(taxsel))[1:length(taxsel)]
 }#repeat text y alignment
+
+if(is.null(txt.x) | length(txt.x)==0){txt.x<-ifelse(inherits(phylo0,"phylo"),tsconv(min(xlimits), phylo0),min(xlimits))
+if(is.null(adj.x)){adj.x<-1}
+}
+if(length(txt.x)==1){
+if(is.na(txt.x)){txt.x<-ifelse(inherits(phylo0,"phylo"),tsconv(min(xlimits), phylo0),min(xlimits))
+if(is.null(adj.x)){adj.x<-1}
+}}
+
 if(length(txt.x)<length(taxsel)){
-if(is.null(txt.x)){txt.x<-mean(xlimits)}
 txt.x<-rep(txt.x, length(taxsel))[1:length(taxsel)]
-}#repeat text x coordingates
-if(length(adj.x)<length(taxsel)){
+}#repeat text x coordinates
+
 if(is.null(adj.x)){adj.x<-0}
+if(length(adj.x)<length(taxsel)){
 adj.x<-rep(adj.x,length(taxsel))[1:length(taxsel)]
 }#set y axis adjustment, if unspecified
 
@@ -1365,7 +1384,7 @@ ape::plot.phylo(phylo0,x.lim=-1*(xlimits-phylo0$root.time),align.tip.label=2, la
 plot(NULL, xlim=xlimits,ylim=c(min(pos)-tbmar[1], max(pos)+tbmar[2]), xlab="",ylab="",axes=FALSE)
 plot1<-NULL
 }
-}else{#if add==FALSE
+}else{#if add==TRUE
 if(dev.cur()==1){stop("ERROR: No open plotting device to add to")}
 
 plot1<-tryCatch({get("last_plot.phylo", envir = ape::.PlotPhyloEnv)}, error=function(e){return(NULL)})
@@ -1477,7 +1496,6 @@ viol(occ[,"x"], pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=f
 #if(inherits(phylo0,"phylo")){}#coordinate conversion if phylo object is being plotted
 
 if(labels==TRUE){#add labels
-
 
     if(length(which(names(txt.x)==taxsel[i]))==1){
     which(names(txt.x)==taxsel[i])->j    

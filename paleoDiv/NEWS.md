@@ -1,3 +1,7 @@
+# paleoDiv 0.3.2
+* patched label placement issue in phylo.spindles() when txt.x==NULL
+
+
 # paleoDiv 0.3.1 (Release date: 2024-05-03)
 * patch for bug in tree.age.combine() (issue with underscores in taxon names, now automatically removed)
 
