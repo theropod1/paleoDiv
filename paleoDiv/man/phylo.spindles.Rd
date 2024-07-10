@@ -12,6 +12,7 @@ phylo.spindles(
   pos = NULL,
   ages = NULL,
   xlimits = NULL,
+  ylimits = NULL,
   res = 1,
   weights = 1,
   dscale = 0.002,
@@ -46,6 +47,8 @@ phylo.spindles(
 \item{ages}{Optional matrix with lower and upper age limits for each spindle, formatted like the output of tree.ages() (most commonly the same calibration matrix used to time-calibrate the tree)}
 
 \item{xlimits}{Limits for plotting on the x axis.}
+
+\item{ylimits}{Limits for plotting on the y axis. If NULL (default) or not a numeric vector of length 2, the y limits are instead constructed from the tbmar parameter and the number of entries in the phylogeny or taxon list.}
 
 \item{res}{Temporal resolution of diversity estimation (if occ is a matrix or data.frame containing plotting statistics, this is ignored)}
 

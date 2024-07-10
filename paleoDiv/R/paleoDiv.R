@@ -1280,6 +1280,7 @@ return(sptab_)
 #' @param pos Position at which to draw spindles. If NULL (default), then spindles are drawn at c(1:n) where n is the number of taxa in phylo0.
 #' @param ages Optional matrix with lower and upper age limits for each spindle, formatted like the output of tree.ages() (most commonly the same calibration matrix used to time-calibrate the tree)
 #' @param xlimits Limits for plotting on the x axis.
+#' @param ylimits Limits for plotting on the y axis. If NULL (default) or not a numeric vector of length 2, the y limits are instead constructed from the tbmar parameter and the number of entries in the phylogeny or taxon list.
 #' @param res Temporal resolution of diversity estimation (if occ is a matrix or data.frame containing plotting statistics, this is ignored)
 #' @param weights Weights for diversity estimation. Must have the same length as the range of xlimits divided by res. For details, see divdistr_()
 #' @param dscale Scale value of the spindles on the y axis. Should be adjusted manually to optimize visibility of results.
@@ -1312,7 +1313,7 @@ return(sptab_)
 #' phylo.spindles(tree_archosauria,occ=archosauria,dscale=0.005,ages=ages_archosauria,txt.x=66)
 #' phylo.spindles(tree_archosauria,occ=diversity_table,dscale=0.005,ages=ages_archosauria,txt.x=66)
 
-phylo.spindles<-function(phylo0, occ, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=NULL, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
+phylo.spindles<-function(phylo0, occ, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, ylimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=NULL, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
 
 if(length(tbmar)==1){tbmar<-rep(tbmar,2)}#if only one value is given for tbmar, duplicate it. Otherwise, first value is bottom, second top
 if(inherits(phylo0,"phylo")){#setting for phylogenetic tree
@@ -1378,10 +1379,24 @@ adj.x<-rep(adj.x,length(taxsel))[1:length(taxsel)]
 if(add==FALSE){
 
 if(inherits(phylo0,"phylo")){
-ape::plot.phylo(phylo0,x.lim=-1*(xlimits-phylo0$root.time),align.tip.label=2, label.offset=50,show.tip.label=FALSE, y.lim=c(1-tbmar[1],length(phylo0$tip.label)+tbmar[2]))->plot1
+
+if(!is.null(ylimits)){
+if(is.numeric(ylimits) & length(ylimits)==2){
+}else{ylimits<-c(1-tbmar[1],length(phylo0$tip.label)+tbmar[2])}
+}else{ylimits<-c(1-tbmar[1],length(phylo0$tip.label)+tbmar[2])}#set y limits
+
+
+
+ape::plot.phylo(phylo0,x.lim=-1*(xlimits-phylo0$root.time),align.tip.label=2, label.offset=50,show.tip.label=FALSE, y.lim=ylimits)->plot1
 
 }else{
-plot(NULL, xlim=xlimits,ylim=c(min(pos)-tbmar[1], max(pos)+tbmar[2]), xlab="",ylab="",axes=FALSE)
+
+if(!is.null(ylimits)){
+if(is.numeric(ylimits) & length(ylimits)==2){
+}else{ylimits<-c(min(pos)-tbmar[1], max(pos)+tbmar[2])}
+}else{ylimits<-c(min(pos)-tbmar[1], max(pos)+tbmar[2])}#set y limits
+
+plot(NULL, xlim=xlimits,ylim=ylimits, xlab="",ylab="",axes=FALSE)
 plot1<-NULL
 }
 }else{#if add==TRUE

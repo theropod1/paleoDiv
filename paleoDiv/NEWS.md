@@ -1,3 +1,6 @@
+# paleoDiv 0.3.3
+* added ylimits parameter to phylo.spindles() to specify vertical plot size is no phylogeny is plotted
+
 # paleoDiv 0.3.2
 * patched label placement issue in phylo.spindles() when txt.x==NULL
 
