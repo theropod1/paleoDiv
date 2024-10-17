@@ -23,6 +23,7 @@ violins(
   add = FALSE,
   ax = TRUE,
   srt = 45,
+  na.rm = TRUE,
   ...
 )
 }
@@ -62,6 +63,8 @@ violins(
 \item{ax}{whether to plot axes}
 
 \item{srt}{angle for categorical axis text rotation}
+
+\item{na.rm}{logical indicating whether to tell viol() to remove NA values (defaults to TRUE)}
 
 \item{...}{other arguments to pass on to paleoDiv::viol() and plot()}
 }

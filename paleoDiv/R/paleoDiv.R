@@ -316,6 +316,7 @@ invisible(data.frame(o_statistic=c(dstat0_,rev(dstat0_)),plot_statistic=c(pos+ds
 #' @param add logical whether to add to existing plot (default: FALSE)
 #' @param ax whether to plot axes
 #' @param srt angle for categorical axis text rotation
+#' @param na.rm logical indicating whether to tell viol() to remove NA values (defaults to TRUE)
 #' @param ... other arguments to pass on to paleoDiv::viol() and plot()
 #' @export violins
 #' @importFrom paleoDiv viol
@@ -323,7 +324,7 @@ invisible(data.frame(o_statistic=c(dstat0_,rev(dstat0_)),plot_statistic=c(pos+ds
 #' data.frame(p=rnorm(50), cat=rep(c("A","B","B","B","B"),10))->d
 #' violins(p~cat,d)
 
-violins<-function(x, data=NULL, group=NULL, horiz=FALSE, order=NULL, xlab="", ylab="", col="black",fill="grey", lwd=1, lty=1,dscale=1,xlim=NULL, ylim=NULL, spaces="_", add=FALSE, ax=TRUE,srt=45,...){
+violins<-function(x, data=NULL, group=NULL, horiz=FALSE, order=NULL, xlab="", ylab="", col="black",fill="grey", lwd=1, lty=1,dscale=1,xlim=NULL, ylim=NULL, spaces="_", add=FALSE, ax=TRUE,srt=45,na.rm=TRUE,...){
 
 if(ax){
 pr<-function(axis="x"){#helper function plotr for label plotting
@@ -387,7 +388,7 @@ if(add==FALSE) plot(NA,type="n", axes=F, ylim=ylim, xlim=xlim,xlab=xlab, ylab=yl
 ##add viols
 if(horiz==T){#horizontal viols
 for(i in 1:ncat){#loop
-paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],...)
+paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
 }#end loop
 
 if(ax){
@@ -399,7 +400,7 @@ text(x=par("usr")[1]-pr("x")*0.015,xpd=T, srt=srt, adj=c(1,0), y=c(1:ncat), col=
 
 }else{#vertical viols
 for(i in 1:ncat){#loop
-paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],...)
+paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
 }#end loop
 
 if(ax){
