@@ -1,3 +1,9 @@
+# paleoDiv 0.4.3
+* added unit option to ts.periods() and ts.stages (allows plotting to x axis scales other than millions of years)
+
+# paleoDiv 0.4.1
+* multijitter and violins now have a parameter "adj" to specify axis label alignment
+
 # paleoDiv 0.4.0
 * added three additional functions of general utility: violins() is a wrapper around viol() facilitating its use for general-purpose violin plots, jitterp() plots a simple jitter plot, and multijitter() is a wrapper around jitterp() analogous to violins() around viol(). These offer an advantage over ggplot2:geom_violin() and ggplot2::geom_jitter() when integration with base R graphics is needed or desired.
 
