@@ -1,3 +1,6 @@
+# paleoDiv 0.4.4
+* fixed behaviour of multijitter() and violins() when group==NULL and x is a numeric vector (previous version would produce error message)
+
 # paleoDiv 0.4.3
 * added unit option to ts.periods() and ts.stages (allows plotting to x axis scales other than millions of years)
 

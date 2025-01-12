@@ -353,7 +353,12 @@ x_->x
 
 }
 
-if(!is.null(spaces)){
+##make sure group exists and is same length as x
+if(is.null(group)) group<-rep(1,length(x))
+if(length(group)<length(x)) group<-rep(group,length(x))
+
+
+if(!is.null(spaces)){#replace spaces
 gsub(spaces," ", group)->group
 }
 
@@ -515,8 +520,11 @@ x_->x
 
 }
 
+##make sure group exists and is same length as x
+if(is.null(group)) group<-rep(1,length(x))
+if(length(group)<length(x)) group<-rep(group,length(x))
 
-if(!is.null(spaces)){
+if(!is.null(spaces)){#replace spaces
 gsub(spaces," ", group)->group
 }
 
