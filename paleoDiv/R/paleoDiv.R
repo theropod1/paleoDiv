@@ -28,12 +28,9 @@ ggcol <- function(n) {
 #' add.alpha("red",0.8)
 
 add.alpha <- function(col, alpha=0.5){
-  if(missing(col))
-    stop("Please provide a vector of colors.")
-  apply(sapply(col, col2rgb)/255, 2, 
-                     function(x) 
-                       rgb(x[1], x[2], x[3], alpha=alpha))  
-}
+  if(missing(col)) stop("Please provide a color vector!")
+  apply(sapply(col, col2rgb)/255, 2, function(channels){rgb(channels[1], channels[2], channels[3], alpha=alpha)})  
+}#XXX
 ##
 
 
@@ -394,7 +391,7 @@ if(add==FALSE) plot(NA,type="n", axes=F, ylim=ylim, xlim=xlim,xlab=xlab, ylab=yl
 ##add viols
 if(horiz==T){#horizontal viols
 for(i in 1:ncat){#loop
-paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
+if(length(x[group==cat[i]])>1) paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
 }#end loop
 
 if(ax){
@@ -406,7 +403,7 @@ text(x=par("usr")[1]-pr("x")*0.015,xpd=T, srt=srt, adj=adj, y=c(1:ncat), col=col
 
 }else{#vertical viols
 for(i in 1:ncat){#loop
-paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
+if(length(x[group==cat[i]])>1) paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
 }#end loop
 
 if(ax){

@@ -1,3 +1,6 @@
+# paleoDiv 0.4.5
+* fixed error in violins caused by groups with n<2; such groups are now ignored automatically (but space is left for them in the plot for the plotting of points or jitterplots)
+
 # paleoDiv 0.4.4
 * fixed behaviour of multijitter() and violins() when group==NULL and x is a numeric vector (previous version would produce error message)
 
