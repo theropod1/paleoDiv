@@ -1,3 +1,6 @@
+# paleoDiv 0.4.6
+* added weights parameter to violins to enable constructing weighted density spindles
+
 # paleoDiv 0.4.5
 * fixed error in violins caused by groups with n<2; such groups are now ignored automatically (but space is left for them in the plot for the plotting of points or jitterplots)
 
