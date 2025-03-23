@@ -188,7 +188,7 @@ return(y_)
 ##
 
 
-##Function viol 
+##Function viol()
 #'Generate a violin plot
 #'
 #' @param x Variable for which to plot violin.
@@ -220,7 +220,12 @@ return(y_)
 #' viol(c(1:10), stat=c(11:20), pos=0, add=FALSE)
 
 viol<-function(x, pos=0, x2=NULL, stat=density, dscale=1, cutoff=range(x), horiz=TRUE, add=TRUE,lim=cutoff,xlab="",ylab="", fill="grey", col="black", lwd=1, lty=1, na.rm=FALSE,...){
-#sort ascending
+
+#function name and arguments
+statname<-deparse(substitute(stat))
+arguments<-list(...)
+
+r_x<-ifelse(all(cutoff==range(x)), TRUE,FALSE) ##test if cutoff is range(x)
 
 if(na.rm){#remove NAs
 which(!is.na(x))->notNA
@@ -228,12 +233,24 @@ if(!is.null(x2)) intersect(notNA,which(!is.na(x2)))->notNA
 
 x[notNA]->x
 if(!is.null(x2)) x2[notNA]->x2
+if("weights" %in% names(arguments)){
+arguments[["weights"]]->wt
+wt[notNA]->arguments[["weights"]]
+}
 }
 
-
+##sort ascending
 if(!is.null(x2) & is.numeric(x2) & length(x2)==length(x)){
 x2[order(x)]->x2
 }
+
+#now order weights
+if("weights" %in% names(arguments)){
+arguments[["weights"]]->wt
+wt[order(x)]->arguments[["weights"]]
+}
+
+#now order x
 x[order(x)]->x
 
 #calculate plotting statistic. defaults to density, but other functions can be used by altering the stat parameter
@@ -242,9 +259,12 @@ if(length(stat)==length(x)){
 stat->d}else{stop("If stat is numeric(), it has to be the same length as x")}
 }else{#if stat is a function
 if(!is.null(x2) & length(x2)==length(x)){
-stat(x2,...)->d
+
+do.call(statname, c(list(x=x2),arguments))->d
+#if(statname!="density") stat(x2,...)->d
 }else{
-stat(x,...)->d
+do.call(statname, c(list(x=x),arguments))->d
+#if(statname!="density") stat(x,...)->d
 }
 }
 
@@ -254,6 +274,8 @@ d<-data.frame(y=d, x=x)#make data.frame if not already existing. Otherwise it is
 
 if(length(cutoff)==1){#if z score is given for cutoff, convert it into range around mean
 cutoff<-c(mean(x,na.rm=TRUE)-cutoff*sd(x,na.rm=TRUE),mean(x,na.rm=TRUE)+cutoff*sd(x,na.rm=TRUE))
+}else{
+if(r_x==TRUE & "weights" %in% names(arguments)) cutoff<-range(x[which(arguments[["weights"]]>0)])
 }
 
 #now crop data range to match cutoff range
@@ -293,10 +315,13 @@ invisible(data.frame(o_statistic=c(dstat0_,rev(dstat0_)),plot_statistic=c(pos+ds
 ##
 
 
+
 ##function violins()
 #' Wrapper around viol() to conveniently plot multiple violins on a single plot, analogous to the behavior of boxplot()
 #' @param x plotting statistic (numeric vector) or formula object from which a plotting statistic and grouping variable can be extracted (i.e. of form x~group)
 #' @param group grouping variable
+#' @param wt optional vector of weights (default=NULL)
+#' @param adjustto1 optional setting whether to adjust weights in each category to sum to 1 (default=TRUE)
 #' @param horiz logical indicating whether to plot horizontally
 #' @param order order of factor levels of categorical factor
 #' @param data data.frame object containing x and y
@@ -322,7 +347,7 @@ invisible(data.frame(o_statistic=c(dstat0_,rev(dstat0_)),plot_statistic=c(pos+ds
 #' data.frame(p=rnorm(50), cat=rep(c("A","B","B","B","B"),10))->d
 #' violins(p~cat,d)
 
-violins<-function(x, data=NULL, group=NULL, horiz=FALSE, order=NULL, xlab="", ylab="", col="black",fill="grey", lwd=1, lty=1,dscale=1,xlim=NULL, ylim=NULL, spaces="_", add=FALSE, ax=TRUE,srt=45, adj=c(1,0), na.rm=TRUE,...){
+violins<-function(x, data=NULL, group=NULL, wt=NULL, adjustto1=TRUE, horiz=FALSE, order=NULL, xlab="", ylab="", col="black",fill="grey", lwd=1, lty=1,dscale=1,xlim=NULL, ylim=NULL, spaces="_", add=FALSE, ax=TRUE,srt=45, adj=c(1,0), na.rm=TRUE,...){
 
 if(ax){
 pr<-function(axis="x"){#helper function plotr for label plotting
@@ -372,7 +397,6 @@ if(length(col)<ncat) rep(col,ncat)[1:ncat]->col
 if(length(fill)<ncat) rep(fill,ncat)[1:ncat]->fill
 if(length(lwd)<ncat) rep(lwd,ncat)[1:ncat]->lwd
 if(length(lty)<ncat) rep(lty,ncat)[1:ncat]->lty
-##XXX##
 if(length(dscale)<ncat) rep(dscale,ncat)[1:ncat]->dscale
 
 ##conditional plot limits
@@ -384,6 +408,9 @@ if(is.null(xlim)) xlim<-c(0,ncat+1)
 if(is.null(ylim)) ylim<-rx
 }
 
+if(!is.null(wt)){
+if(length(wt)<length(x)) wt<-rep(wt,length(x))[1:length(x)]
+}
 
 ##now plot
 if(add==FALSE) plot(NA,type="n", axes=F, ylim=ylim, xlim=xlim,xlab=xlab, ylab=ylab,...)#base plot
@@ -391,7 +418,21 @@ if(add==FALSE) plot(NA,type="n", axes=F, ylim=ylim, xlim=xlim,xlab=xlab, ylab=yl
 ##add viols
 if(horiz==T){#horizontal viols
 for(i in 1:ncat){#loop
-if(length(x[group==cat[i]])>1) paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
+
+if(length(x[group==cat[i]])>1){
+
+if(!is.null(wt)){#weighted
+
+wt[group==cat[i]]->wts
+if(adjustto1) wts<-wts/sum(wts)
+
+paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i], na.rm=na.rm,weights=wts,...)
+
+}else{ #unweighted
+paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
+
+}
+}
 }#end loop
 
 if(ax){
@@ -403,7 +444,20 @@ text(x=par("usr")[1]-pr("x")*0.015,xpd=T, srt=srt, adj=adj, y=c(1:ncat), col=col
 
 }else{#vertical viols
 for(i in 1:ncat){#loop
-if(length(x[group==cat[i]])>1) paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
+
+if(length(x[group==cat[i]])>1) {
+if(!is.null(wt)){#weighted
+
+wt[group==cat[i]]->wts
+if(adjustto1) wts<-wts/sum(wts)
+
+paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,weights=wts,...)
+
+}else{#unweighted
+paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i], lwd=lwd[i], lty=lty[i],dscale=dscale[i],na.rm=na.rm,...)
+
+}
+}
 }#end loop
 
 if(ax){

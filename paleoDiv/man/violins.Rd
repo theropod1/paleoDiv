@@ -8,6 +8,8 @@ violins(
   x,
   data = NULL,
   group = NULL,
+  wt = NULL,
+  adjustto1 = TRUE,
   horiz = FALSE,
   order = NULL,
   xlab = "",
@@ -34,6 +36,10 @@ violins(
 \item{data}{data.frame object containing x and y}
 
 \item{group}{grouping variable}
+
+\item{wt}{optional vector of weights (default=NULL)}
+
+\item{adjustto1}{optional setting whether to adjust weights in each category to sum to 1 (default=TRUE)}
 
 \item{horiz}{logical indicating whether to plot horizontally}
 
