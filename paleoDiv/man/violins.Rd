@@ -26,6 +26,7 @@ violins(
   ax = TRUE,
   srt = 45,
   adj = c(1, 0),
+  italicize.cat = FALSE,
   na.rm = TRUE,
   ...
 )
@@ -72,6 +73,8 @@ violins(
 \item{srt}{angle for categorical axis text rotation}
 
 \item{adj}{adjustment for axis labels (defaults to c(1,0), i.e. top right)}
+
+\item{italicize.cat}{Logical indicating whether category labels should be italicized (defaults to FALSE)}
 
 \item{na.rm}{logical indicating whether to tell viol() to remove NA values (defaults to TRUE)}
 

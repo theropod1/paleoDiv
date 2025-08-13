@@ -21,6 +21,7 @@ multijitter(
   add = TRUE,
   ax = FALSE,
   srt = 45,
+  italicize.cat = FALSE,
   adj = c(1, 0),
   ...
 )
@@ -57,6 +58,8 @@ multijitter(
 \item{ax}{whether to plot axes}
 
 \item{srt}{angle for categorical axis text rotation}
+
+\item{italicize.cat}{Logical indicating whether category labels should be italicized (defaults to FALSE)}
 
 \item{adj}{adjustment for axis labels (defaults to c(1,0), i.e. top right)}
 

@@ -2,14 +2,14 @@
 % Please edit documentation in R/paleoDiv.R
 \name{occ.cleanup}
 \alias{occ.cleanup}
-\title{Clean up occurrence dataset by removing commonly used character combinations in the identified name that will result in different factor levels for the same taxon.}
+\title{Clean up occurrence dataset by removing double whitespaces and commonly used character combinations in the identified name that will result in more than one factor level per identified taxon.}
 \usage{
 occ.cleanup(x, remove = NULL, return.df = FALSE)
 }
 \arguments{
 \item{x}{A occurrence data.frame or character vector containing the variable to clean up (defaults to x$tna)}
 
-\item{remove}{Which values to remove. If NULL, a default set of commonly occurring character combinations is used ("n. gen.", "n. sp.", "cf.","aff.", punctuation, as well as double, leading and ending spaces). If user-defined, remove needs to be formatted as a character vector with the values to be removed as names, i.e. in the format of c("remove_this" = "", "removethistoo"="")}
+\item{remove}{A vector containing character strings to remove from x. If NULL (default), a default set of commonly occurring strings is automatically deleted: "aff.","n. gen.","cf.", "n. sp." as well as lonely punctuation marks and leading and ending whitespace. Multiple different replacements can also be specified by using the strings to be replaced as names and the replacement as values in the vector. See details.}
 
 \item{return.df}{A logical indicating whether to return the entire data.frame (if TRUE) or just the column of taxonomic names.}
 }
@@ -17,7 +17,10 @@ occ.cleanup(x, remove = NULL, return.df = FALSE)
 A character vector containing the cleaned up taxonomic names or a dataframe with cleaned-up tna column (if return.df==TRUE).
 }
 \description{
-Clean up occurrence dataset by removing commonly used character combinations in the identified name that will result in different factor levels for the same taxon.
+Clean up occurrence dataset by removing double whitespaces and commonly used character combinations in the identified name that will result in more than one factor level per identified taxon.
+}
+\details{
+The function removes double whitespaces (replacing them with single spaces) and deletes all the character strings supplied via the remove-parameter. From version 0.4.7, this parameter can be a simple character vector containing all the strings that should be removed. The parameter remains fully backward-compatible, so that a vector with names will trigger replacement of the strings in the names by the strings in the values.
 }
 \examples{
 data(archosauria)

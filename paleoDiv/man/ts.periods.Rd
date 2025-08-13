@@ -16,7 +16,9 @@ ts.periods(
   txt.y = mean,
   bw = FALSE,
   update = NULL,
-  unit = "ma"
+  unit = "ma",
+  abbr = "n",
+  ...
 )
 }
 \arguments{
@@ -40,9 +42,13 @@ ts.periods(
 
 \item{bw}{Logical whether to plot in black and white (defaults to FALSE). If TRUE, time scale is drawn with a white background}
 
-\item{update}{Character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named periods, bottom, top and col, giving the period names, start time in ma, end time in ma and a valid color value, respectively.}
+\item{update}{data.frame() object or character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named periods, bottom, top and col, giving the period names, start time in ma, end time in ma and a valid color value, respectively.}
 
 \item{unit}{what unit of time to use. Defaults to "ma" (million years), other possible settings are "ka" or 1000 (for thousands of years), or "a", 1 or "years" for years.}
+
+\item{abbr}{Number of characters to abbreviate each name to, defaults to "all"}
+
+\item{...}{additional arguments to pass on to text()}
 }
 \value{
 Plots a timescale on the currently active plot.

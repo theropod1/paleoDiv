@@ -1,3 +1,7 @@
+# paleoDiv 0.4.7
+* fixed handling of missing values by tree.ages.spp()
+* improved occ.cleanup filtering presets
+
 # paleoDiv 0.4.6
 * added weights parameter to violins to enable constructing weighted density spindles
 

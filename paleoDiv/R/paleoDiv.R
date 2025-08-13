@@ -30,7 +30,7 @@ ggcol <- function(n) {
 add.alpha <- function(col, alpha=0.5){
   if(missing(col)) stop("Please provide a color vector!")
   apply(sapply(col, col2rgb)/255, 2, function(channels){rgb(channels[1], channels[2], channels[3], alpha=alpha)})  
-}#XXX
+}
 ##
 
 
@@ -206,7 +206,7 @@ return(y_)
 #' @param col Line color for the plotted violin
 #' @param lwd Line width for the plotted violin
 #' @param lty Line width for the plotted violin
-#' @param na.rm logical indicating whether to remove NA values from input data.
+#' @param na.rm logical indicating whether to remove NA values from input data (defaults to TRUE).
 #' @param ... Other arguments to be passed on to function in parameter stat
 #' @return A violin plot and a data.frame containing the original and modified plotting statistic and independent variable against which it is plotted.
 #' @details
@@ -219,44 +219,63 @@ return(y_)
 #' viol(c(1:10), width=9, stat=rmean, pos=0, add=FALSE)
 #' viol(c(1:10), stat=c(11:20), pos=0, add=FALSE)
 
-viol<-function(x, pos=0, x2=NULL, stat=density, dscale=1, cutoff=range(x), horiz=TRUE, add=TRUE,lim=cutoff,xlab="",ylab="", fill="grey", col="black", lwd=1, lty=1, na.rm=FALSE,...){
+viol<-function(x, pos=0, x2=NULL, stat=density, dscale=1, cutoff=range(x,na.rm=TRUE), horiz=TRUE, add=TRUE,lim=cutoff,xlab="",ylab="", fill="grey", col="black", lwd=1, lty=1, na.rm=TRUE,...){
 
 #function name and arguments
 statname<-deparse(substitute(stat))
 arguments<-list(...)
 
-r_x<-ifelse(all(cutoff==range(x)), TRUE,FALSE) ##test if cutoff is range(x)
+r_x<-ifelse(all(cutoff==range(x,na.rm=TRUE)), TRUE, FALSE) ##test if cutoff is range(x)
+if(all(is.na(cutoff==range(x)))) r_x<-TRUE ##test if cutoff is range(x) of c(NA,NA)
 
-if(na.rm){#remove NAs
-which(!is.na(x))->notNA
-if(!is.null(x2)) intersect(notNA,which(!is.na(x2)))->notNA
+if(na.rm==TRUE){#remove NAs
+
+!is.na(x)->notNA
+if(!is.null(x2)) notNA & !is.na(x2) -> notNA
+if(is.numeric(stat)) notNA & !is.na(stat) -> notNA
 
 x[notNA]->x
 if(!is.null(x2)) x2[notNA]->x2
+if(is.numeric(stat)) stat[notNA]->stat
+
 if("weights" %in% names(arguments)){
 arguments[["weights"]]->wt
+wt[which(is.na(wt))]<-0 #assign weight of 0 to na values
 wt[notNA]->arguments[["weights"]]
 }
+if("w" %in% names(arguments)){
+arguments[["w"]]->wt
+wt[which(is.na(wt))]<-0 #assign weight of 0 to na values
+wt[notNA]->arguments[["w"]]
 }
 
-##sort ascending
-if(!is.null(x2) & is.numeric(x2) & length(x2)==length(x)){
-x2[order(x)]->x2
 }
 
-#now order weights
+##sort data in by ascending x values
+order(x)->o
+if(!is.null(x2) && is.numeric(x2) && length(x2)==length(x)){
+x2[o]->x2
+}
+if(is.numeric(stat)) stat[o]->stat
+
+#order weights
 if("weights" %in% names(arguments)){
 arguments[["weights"]]->wt
-wt[order(x)]->arguments[["weights"]]
+wt[o]->arguments[["weights"]]
+}
+if("w" %in% names(arguments)){
+arguments[["w"]]->wt
+wt[which(is.na(wt))]<-0 #assign weight of 0 to na values
+wt[o]->arguments[["w"]]
 }
 
-#now order x
-x[order(x)]->x
+#now order x itself
+x[o]->x
 
 #calculate plotting statistic. defaults to density, but other functions can be used by altering the stat parameter
 if(is.numeric(stat)){#if stat is a vector 
 if(length(stat)==length(x)){
-stat->d}else{stop("If stat is numeric(), it has to be the same length as x")}
+stat->d}else{stop("If stat is numeric(), it has to have the same length as x")}
 }else{#if stat is a function
 if(!is.null(x2) & length(x2)==length(x)){
 
@@ -280,7 +299,7 @@ if(r_x==TRUE & "weights" %in% names(arguments)) cutoff<-range(x[which(arguments[
 
 #now crop data range to match cutoff range
 as.numeric(d$y[which(d$x<=max(cutoff) & d$x>=min(cutoff))])->dstat0
-dstat0[!is.na(dstat0)]->dstat0_#remove NAs
+dstat0[!is.na(dstat0)]->dstat0_#remove NAs, if any appeared
 dstat0_/2*dscale->dstat#scaled statistic to contruct violin
 
 as.numeric(d$x[which(d$x<=max(cutoff) & d$x>=min(cutoff))])->xstat
@@ -338,6 +357,7 @@ invisible(data.frame(o_statistic=c(dstat0_,rev(dstat0_)),plot_statistic=c(pos+ds
 #' @param add logical whether to add to existing plot (default: FALSE)
 #' @param ax whether to plot axes
 #' @param srt angle for categorical axis text rotation
+#' @param italicize.cat Logical indicating whether category labels should be italicized (defaults to FALSE)
 #' @param na.rm logical indicating whether to tell viol() to remove NA values (defaults to TRUE)
 #' @param adj adjustment for axis labels (defaults to c(1,0), i.e. top right)
 #' @param ... other arguments to pass on to paleoDiv::viol() and plot()
@@ -347,7 +367,7 @@ invisible(data.frame(o_statistic=c(dstat0_,rev(dstat0_)),plot_statistic=c(pos+ds
 #' data.frame(p=rnorm(50), cat=rep(c("A","B","B","B","B"),10))->d
 #' violins(p~cat,d)
 
-violins<-function(x, data=NULL, group=NULL, wt=NULL, adjustto1=TRUE, horiz=FALSE, order=NULL, xlab="", ylab="", col="black",fill="grey", lwd=1, lty=1,dscale=1,xlim=NULL, ylim=NULL, spaces="_", add=FALSE, ax=TRUE,srt=45, adj=c(1,0), na.rm=TRUE,...){
+violins<-function(x, data=NULL, group=NULL, wt=NULL, adjustto1=TRUE, horiz=FALSE, order=NULL, xlab="", ylab="", col="black",fill="grey", lwd=1, lty=1,dscale=1,xlim=NULL, ylim=NULL, spaces="_", add=FALSE, ax=TRUE,srt=45, adj=c(1,0),italicize.cat=FALSE, na.rm=TRUE,...){
 
 if(ax){
 pr<-function(axis="x"){#helper function plotr for label plotting
@@ -386,7 +406,7 @@ gsub(spaces," ", group)->group
 
 
 ##xrange and number of categories
-range(x)->rx
+range(x,na.rm=TRUE)->rx
 levels(factor(group))->cat
 length(cat)->ncat
 
@@ -437,8 +457,9 @@ paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=TRUE, fill=fill[i], col=col[i], 
 
 if(ax){
 axis(1)
-#mtext(side=2, at=c(1:ncat), text=cat, col=col)
-text(x=par("usr")[1]-pr("x")*0.015,xpd=T, srt=srt, adj=adj, y=c(1:ncat), col=col, cat)
+namcat<-cat
+if(italicize.cat) namcat <- parse(text = paste0("italic('", namcat, "')"))
+text(x=par("usr")[1]-pr("x")*0.015,xpd=T, srt=srt, adj=adj, y=c(1:ncat), col=col, namcat)
 
 }
 
@@ -463,8 +484,9 @@ paleoDiv::viol(x=x[group==cat[i]], pos=i, horiz=FALSE, fill=fill[i], col=col[i],
 if(ax){
 axis(2)
 
-#mtext(side=1, at=c(1:ncat), text=cat, col=col)
-text(y=par("usr")[3]-pr("y")*0.015,xpd=T, srt=srt, adj=adj, x=c(1:ncat), col=col, cat)
+namcat<-cat
+if(italicize.cat) namcat <- parse(text = paste0("italic('", namcat, "')"))
+text(y=par("usr")[3]-pr("y")*0.015,xpd=T, srt=srt, adj=adj, x=c(1:ncat), col=col, namcat)
 
 }
 
@@ -505,7 +527,7 @@ y<-rep(y,length(x))+rnorm(n=length(x), mean=0, sd=width)
 }else if(length(x)==1){
 x<-rep(x,length(y))+rnorm(n=length(y), mean=0, sd=width)
 }else{
-stop("Please make sure either x or y is length()==1")
+stop("Please make sure either x or y is of length()==1")
 }
 
 points(x=x, y=y,col=paleoDiv::add.alpha(col,alpha),...)
@@ -535,6 +557,7 @@ invisible(data.frame(x,y))
 #' @param srt angle for categorical axis text rotation
 #' @param adj adjustment for axis labels (defaults to c(1,0), i.e. top right)
 #' @param add logical whether to add to existing plot (default: TRUE)
+#' @param italicize.cat Logical indicating whether category labels should be italicized (defaults to FALSE)
 #' @param ... other arguments to pass on to jitterp() and plot()
 #' @importFrom graphics axis
 #' @importFrom graphics mtext
@@ -542,8 +565,9 @@ invisible(data.frame(x,y))
 #' @examples 
 #' data.frame(p=rnorm(50), cat=rep(c("A","B","B","B","B"),10))->d
 #' multijitter(p~cat,d, add=FALSE)
+##pchs, cols, cexs, alphas for point-specific plotting
 
-multijitter<-function(x, data=NULL, group=NULL, horiz=FALSE, order=NULL, xlab="", ylab="", col="black", pch=16, spaces="_", width=0.1, xlim=NULL, ylim=NULL,add=TRUE,ax=FALSE,srt=45, adj=c(1,0),...){
+multijitter<-function(x, data=NULL, group=NULL, horiz=FALSE, order=NULL, xlab="", ylab="", col="black", pch=16, spaces="_", width=0.1, xlim=NULL, ylim=NULL,add=TRUE,ax=FALSE,srt=45, italicize.cat=FALSE, adj=c(1,0),...){
 if(ax){
 pr<-function(axis="x"){#helper function plotr for label plotting
 if(axis=="x"){
@@ -580,7 +604,7 @@ gsub(spaces," ", group)->group
 }
 
 ##xrange and number of categories
-range(x)->rx
+range(x,na.rm=TRUE)->rx
 levels(factor(group))->cat
 length(cat)->ncat
 
@@ -611,14 +635,16 @@ for(i in 1:ncat){#loop
 
 
 jitterp(x=x[group==cat[i]], y=i, width=width, col=col[i], pch=pch[i],...)->out[[i]]
-
+##XXX
 
 }#end loop
 
 if(ax){
 axis(1)
 #mtext(side=2, at=c(1:ncat), text=cat, col=col)
-text(x=par("usr")[1]-pr("x")*0.015,xpd=T, srt=srt, adj=adj, y=c(1:ncat), col=col, cat)
+namcat<-cat
+if(italicize.cat) namcat <- parse(text = paste0("italic('", namcat, "')"))
+text(x=par("usr")[1]-pr("x")*0.015,xpd=T, srt=srt, adj=adj, y=c(1:ncat), col=col, namcat)
 
 }
 
@@ -627,7 +653,7 @@ for(i in 1:ncat){#loop
 
 
 jitterp(y=x[group==cat[i]], x=i, width=width, col=col[i], pch=pch[i],...)->out[[i]]
-
+##XXX
 
 }#end loop
 
@@ -635,7 +661,9 @@ if(ax){
 axis(2)
 
 #mtext(side=1, at=c(1:ncat), text=cat, col=col)
-text(y=par("usr")[3]-pr("y")*0.015,xpd=T, srt=srt, adj=adj, x=c(1:ncat), col=col, cat)
+namcat<-cat
+if(italicize.cat) namcat <- parse(text = paste0("italic('", namcat, "')"))
+text(y=par("usr")[3]-pr("y")*0.015,xpd=T, srt=srt, adj=adj, x=c(1:ncat), col=col, namcat)
 
 }
 
@@ -677,8 +705,10 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 #' @param adj.txt Numeric vector of length==2 giving horizontal and vertical label alignment (defaults to centered, i.e. 0.5 for both values)
 #' @param txt.y Function to use to determine the vertical text position (defaults to mean, i.e. centered) 
 #' @param bw Logical whether to plot in black and white (defaults to FALSE). If TRUE, time scale is drawn with a white background
-#' @param update Character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named periods, bottom, top and col, giving the period names, start time in ma, end time in ma and a valid color value, respectively.
+#' @param update data.frame() object or character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named periods, bottom, top and col, giving the period names, start time in ma, end time in ma and a valid color value, respectively.
 #' @param unit what unit of time to use. Defaults to "ma" (million years), other possible settings are "ka" or 1000 (for thousands of years), or "a", 1 or "years" for years.
+#' @param abbr Number of characters to abbreviate each name to, defaults to "all"
+#' @param ... additional arguments to pass on to text()
 #' @return Plots a timescale on the currently active plot.
 #' @importFrom graphics text
 #' @importFrom graphics par
@@ -690,11 +720,13 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 #' ape::plot.phylo(tree_archosauria)
 #' ts.periods(tree_archosauria, alpha=0.5)
 
-ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quarternary"),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma"){
+ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quarternary"),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
   ## Data for geological periods
   
-  if(!is.null(update)){
-  read.csv(update)->ts #use this to manually update time scale
+if(!is.null(update)){
+if(!is.data.frame(update) & is.character(update)) read.csv(update)->ts #custom/updated time scale import
+if(is.data.frame(update)) update->ts #custom/updated time scale import
+
   periods<-data.frame(interval=ts$periods,start=ts$bottom, end=ts$top,col=ts$col)
   
   }else{
@@ -706,14 +738,16 @@ ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quarternary"),co
   
   
 if(unit=="ka" | unit==1000){
-intervals$start<-intervals$start*1000
-intervals$end<-intervals$end*1000
+periods$start<-periods$start*1000
+periods$end<-periods$end*1000
 }
 
 if(unit=="a" | unit=="yr" | unit == "years" | unit == "Years" | unit==1){
-intervals$start<-intervals$start*1000000
-intervals$end<-intervals$end*1000000
+periods$start<-periods$start*1000000
+periods$end<-periods$end*1000000
 }
+
+  if(is.numeric(abbr)) periods$period<-paste0(substr(periods$period,0,abbr),".")
 
   if(!is.null(phylo)){
 periods$start<-tsconv(periods$start,phylo)
@@ -753,8 +787,8 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
     if(periods$period[i] %in% exclude == FALSE){
     
     if(length(col.txt)>1){#if text colors are given as vector
-    text(x=mean(c(periods$start[i],periods$end[i])),y=txt.y(ylim), adj=adj.txt,periods$period[i],col=col.txt[i])}else{#if single text color is given
-    text(x=mean(c(periods$start[i],periods$end[i])),y=txt.y(ylim), adj=adj.txt,periods$period[i],col=col.txt)
+    text(x=mean(c(periods$start[i],periods$end[i])),y=txt.y(ylim), adj=adj.txt,periods$period[i],col=col.txt[i],...)}else{#if single text color is given
+    text(x=mean(c(periods$start[i],periods$end[i])),y=txt.y(ylim), adj=adj.txt,periods$period[i],col=col.txt,...)
     }
     }
     
@@ -780,6 +814,8 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
 #' @param bw Logical whether to plot in black and white (defaults to FALSE). If TRUE, time scale is drawn with a white background
 #' @param update Character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named stage, bottom, top and col, giving the stage names, start time in ma, end time in ma and a valid color value, respectively.
 #' @param unit what unit of time to use. Defaults to "ma" (million years), other possible settings are "ka" or 1000 (for thousands of years), or "a", 1 or "years" for years.
+#' @param abbr Number of characters to abbreviate each name to, defaults to "all"
+#' @param ... additional arguments to pass on to text()
 #' @return Plots a timescale on the currently active plot.
 #' @importFrom graphics text
 #' @importFrom graphics par
@@ -793,11 +829,13 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
 #' ts.periods(tree_archosauria, alpha=0)
 
 
-ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma"){
+ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
   ##Data for geological periods
   if(!is.null(update)){
-  read.csv(update)->ts #use this to manually update time scale
-  intervals<-data.frame(interval=ts$stage,start=ts$bottom, end=ts$top,col=ts$col)
+if(!is.data.frame(update) & is.character(update)) read.csv(update)->ts #custom/updated time scale import
+if(is.data.frame(update)) update->ts #custom/updated time scale import
+
+intervals<-data.frame(interval=ts$stage,start=ts$bottom, end=ts$top,col=ts$col)
   }else{
     intervals<-data.frame(interval=c('Avalon Assemblage', 'White Sea Assemblage', 'Nama Assemblage', 'Fortunian', 'Stage 2', 'Stage 3', 'Stage 4', 'Wulian', 'Drumian', 'Guzhangian', 'Paibian', 'Jiangshanian', 'Stages 10', 'Tremadocian', 'Floian', 'Dapingian', 'Darriwilian', 'Sandbian', 'Katian', 'Hirnantian', 'Rhuddanian', 'Aeronian', 'Telychian', 'Sheinwoodian', 'Homerian', 'Gorstian', 'Ludfordian', 'Pridoli', 'Lochkovian', 'Pragian', 'Emsian', 'Eifelian', 'Givetian', 'Frasnian', 'Famennian', 'Tournaisian', 'Visean', 'Serpukhovian', 'Bashkirian', 'Moscovian', 'Kasimovian', 'Gzhelian', 'Asselian', 'Sakmarian', 'Artinskian', 'Kungurian', 'Roadian', 'Wordian', 'Capitanian', 'Wuchiapingian', 'Changhsingian', 'Induan', 'Olenekian', 'Anisian', 'Ladinian', 'Carnian', 'Norian', 'Rhaetian', 'Hettangian', 'Sinemurian', 'Pliensbachian', 'Toarcian', 'Aalenian', 'Bajocian', 'Bathonian', 'Callovian', 'Oxfordian', 'Kimmeridgian', 'Tithonian', 'Berriasian', 'Valanginian', 'Hauterivian', 'Barremian', 'Aptian', 'Albian', 'Cenomanian', 'Turonian', 'Coniacian', 'Santonian', 'Campanian', 'Maastrichtian', 'Danian', 'Selandian-Thanetian', 'Ypresian', 'Lutetian', 'Bartonian', 'Priabonian', 'Rupelian', 'Chattian', 'Lower Miocene', 'Middle Miocene', 'Upper Miocene', 'Pliocene', 'Pleistocene', 'Holocene'),start=c(580, 560, 550, 538.8, 529, 521, 514.5, 509, 504.5, 500.5, 497, 494.2, 491, 486.85, 477.08, 471.26, 469.42, 458.18, 452.75, 445.21, 443.07, 440.49, 438.59, 432.93, 430.62, 426.74, 425.01, 422.73, 419, 412.4, 410.51, 394.3, 385.3, 378.9, 371.1, 359.3, 346.73, 330.34, 323.4, 315.15, 307.02, 303.68, 298.89, 293.52, 290.51, 283.3, 274.37, 269.21, 264.34, 259.55, 254.24, 251.9, 249.88, 246.7, 241.46, 237, 227.3, 209.51, 201.36, 199.46, 192.9, 184.2, 174.7, 170.9, 168.17, 165.29, 161.53, 154.78, 149.24, 143.1, 137.7, 132.6, 126.5, 121.4, 113.2, 100.5, 93.9, 89.39, 85.7, 83.65, 72.17, 66.04, 61.66, 56, 48.07, 41.03, 37.71, 33.9, 27.29, 23.04, 15.99, 11.63, 5.33, 2.59, 0.0117), end=c(560, 550, 538.8, 529, 521, 514.5, 509, 504.5, 500.5, 497, 494.2, 491, 486.85, 477.08, 471.26, 469.42, 458.18, 452.75, 445.21, 443.07, 440.49, 438.59, 432.93, 430.62, 426.74, 425.01, 422.73, 419, 412.4, 410.51, 394.3, 385.3, 378.9, 371.1, 359.3, 346.73, 330.34, 323.4, 315.15, 307.02, 303.68, 298.89, 293.52, 290.51, 283.3, 274.37, 269.21, 264.34, 259.55, 254.24, 251.9, 249.88, 246.7, 241.46, 237, 227.3, 209.51, 201.36, 199.46, 192.9, 184.2, 174.7, 170.9, 168.17, 165.29, 161.53, 154.78, 149.24, 143.1, 137.7, 132.6, 126.5, 121.4, 113.2, 100.5, 93.9, 89.39, 85.7, 83.65, 72.17, 66.04, 61.66, 56, 48.07, 41.03, 37.71, 33.9, 27.29, 23.04, 15.99, 11.63, 5.33, 2.59, 0.0117, 0),col=c('#fcd589', '#fdd587', '#fed583', '#a9be93', '#b6c29e', '#b5ca9f', '#c0ceaa', '#c1d6af', '#cddbb8', '#d6e1c1', '#d8e8c4', '#e4efcf', '#edf2db', '#0dac98', '#0eb1a0', '#67c0ae', '#79c5b8', '#9bceaf', '#a6d5c3', '#b6d9c3', '#b3dccc', '#c1e1d6', '#cae8e0', '#cce7d8', '#d6ebe2', '#d6ecea', '#e2f1ec', '#ebf5ec', '#eac378', '#ebcd87', '#edd595', '#f5da93', '#f5e2a0', '#f4edc3', '#f4f0d5', '#9db989', '#b7c089', '#cdc888', '#a6c9cd', '#bed3ce', '#cad8d9', '#d6dcda', '#e07f6c', '#e18a76', '#e39684', '#e49f90', '#f49984', '#f4a692', '#f6af9b', '#fac4b8', '#facfc6', '#b266a6', '#bb71ac', '#c793c3', '#d0a0c8', '#d1b3d5', '#dbc1de', '#e5cbe4', '#22b5e9', '#5ebeee', '#86c9f3', '#a3d1f3', '#a2d8f0', '#b0dff1', '#bce3f2', '#cae6f2', '#cce8fd', '#d4eefd', '#e0f2fc', '#9ec979', '#a8d182', '#b7d690', '#c2da9c', '#cfe1a7', '#d9e8b1', '#c6d86c', '#d2dd77', '#dce383', '#e5e88f', '#efec9b', '#f5f1a7', '#fbc27f', '#fccb87', '#f7ba8e', '#f9c39f', '#fcceac', '#fcd7ba', '#fedfb3', '#ffeac3', '#fff14a', '#fef26b', '#fef488', '#fff7b2', '#fff2c5', '#fff5eb'))
 }
@@ -817,6 +855,7 @@ intervals$start<-tsconv(intervals$start,phylo)
 intervals$end<-tsconv(intervals$end,phylo)
   }
   
+  if(is.numeric(abbr)) intervals$interval<-paste0(substr(intervals$interval,0,abbr),".")
   
   if(is.null(col.txt)){
     col.txt<-intervals$col}
@@ -857,8 +896,8 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
     
     if(names==TRUE){
     if(length(col.txt)>1){
-    text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt[i])}else{
-    text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt)
+    text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt[i],...)}else{
+    text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt,...)
     }
     }
   }
@@ -1286,26 +1325,45 @@ return(tmp)}
 ##
 
 ##Function occ.cleanup
-#' Clean up occurrence dataset by removing commonly used character combinations in the identified name that will result in different factor levels for the same taxon.
+#' Clean up occurrence dataset by removing double whitespaces and commonly used character combinations in the identified name that will result in more than one factor level per identified taxon.
 #'
 #' @param x A occurrence data.frame or character vector containing the variable to clean up (defaults to x$tna)
-#' @param remove Which values to remove. If NULL, a default set of commonly occurring character combinations is used ("n. gen.", "n. sp.", "cf.","aff.", punctuation, as well as double, leading and ending spaces). If user-defined, remove needs to be formatted as a character vector with the values to be removed as names, i.e. in the format of c("remove_this" = "", "removethistoo"="")
+#' @param remove A vector containing character strings to remove from x. If NULL (default), a default set of commonly occurring strings is automatically deleted: "aff.","n. gen.","cf.", "n. sp." as well as lonely punctuation marks and leading and ending whitespace. Multiple different replacements can also be specified by using the strings to be replaced as names and the replacement as values in the vector. See details.
 #' @param return.df A logical indicating whether to return the entire data.frame (if TRUE) or just the column of taxonomic names.
 #' @return A character vector containing the cleaned up taxonomic names or a dataframe with cleaned-up tna column (if return.df==TRUE).
-#' @importFrom stringr str_replace_all
+#' @details The function removes double whitespaces (replacing them with single spaces) and deletes all the character strings supplied via the remove-parameter. From version 0.4.7, this parameter can be a simple character vector containing all the strings that should be removed. The parameter remains fully backward-compatible, so that a vector with names will trigger replacement of the strings in the names by the strings in the values.
 #' @export occ.cleanup
 #' @examples
 #' data(archosauria)
 #' occ.cleanup(archosauria$Stegosauria)->archosauria$Stegosauria
 
 occ.cleanup<-function(x,remove=NULL,return.df=FALSE){
+
 if(is.null(remove)){
-remove<-c("aff. "="","n. gen. "="","cf. "=""," $"="", "^ "="", "n. sp. "="","[[:punct:]]"="", "  "=" ")
+remove<-c("aff.","n. gen.","cf.", "n. sp.", " [[:punct:]] ", "^[[:punct:]]", " [[:punct:]]$", "^\\s*","\\s*$")
+rem<-rep("",length(remove))
+names(rem)<-remove
+
+}else{
+if(is.null(names(remove))){
+rem<-rep("",length(remove))
+names(rem)<-remove
+}else{
+rem<-remove
+}
 }
 
+#define internal multiple-replacement function
+multigsub<-function(x,patterns,replacements="",...){
+if(length(patterns)>length(replacements)) rep(replacements,length(patterns))[1:length(patterns)]->replacements
+for(j in 1:length(patterns)) x<-gsub(patterns[j],replacements[j],x,...)
+return(x)}#
+
+#perform replacements
 if(is.data.frame(x)){
 length(levels(factor(x$tna)))->lev
-stringr::str_replace_all(x$tna, remove)->out
+multigsub(x$tna,patterns=names(rem),replacements=rem,perl=TRUE)->out
+gsub("\\s{2,}"," ", out,perl=TRUE)->out#remove multiple successive whitespaces
 
 if(return.df==TRUE){
 x$tna<-out
@@ -1313,7 +1371,8 @@ x$tna<-out
 
 }else{
 length(levels(factor(x)))->lev
-stringr::str_replace_all(x, remove)->out
+multigsub(x,patterns=names(rem),replacements=rem,perl=TRUE)->out
+gsub("\\s{2,}"," ", out,perl=TRUE)->out#remove multiple successive whitespaces
 }
 
 message(paste(lev, "factor levels reduced down to", length(levels(factor(out)))))
@@ -1519,7 +1578,7 @@ tree.ages.spp<-function(phylo0, data){
  }
 
  if(ncol(data)<3){stop("No valid data could be found, perhaps the taxon you entered cannot be found on the paleobiology database.")}
- if(exists("data$tna") & exists("data$max") & exists("data$min")){stop("No valid data could be found, perhaps the taxon you entered cannot be found on the paleobiology database.")}
+ #if(exists("data$tna") & exists("data$max") & exists("data$min")){stop("No valid data could be found, perhaps the taxon you entered cannot be found on the paleobiology database.")}
  
  if(inherits(phylo0, "phylo")){
  phylo0$tip.label->tips
@@ -1532,7 +1591,6 @@ tree.ages.spp<-function(phylo0, data){
  gsub("_"," ", tips)->tips
  
  missing<-character()
- print(length(missing))
  
  for(i in 1:length(tips)){#loop through taxa and fill in range table
  #print(tips[i])
@@ -1544,8 +1602,8 @@ tree.ages.spp<-function(phylo0, data){
  }
  
  if(length(w)>0){
- max(data[w,"max"])->FAD
- min(data[w,"min"])->LAD
+ max(data[w,"max"],na.rm=TRUE)->FAD
+ min(data[w,"min"],na.rm=TRUE)->LAD
 
  ages[i,"FAD"]<-FAD
  ages[i,"LAD"]<-LAD
@@ -1597,6 +1655,7 @@ return(x_)
 #' @return A two-column matrix containing earliest and latest occurrences for each taxon in taxa, with taxon names as row names
 #' @details tree.age.combine builds the union of two calibration matrices if some of the values in one of them are NAs. If exact matches for some entries cannot be found, a relaxed search matching only the first word (i.e. usually the genus name) in each taxon name is run, in order to fill in as much of the age matrix as possible with non-NA values. It is highly recommended to manually inspect the resulting table for accuracy.
 #' @importFrom utils read.csv
+#' @importFrom stringr word
 #' @export tree.age.combine
 #' @examples
 #' data(archosauria)
@@ -1606,6 +1665,22 @@ return(x_)
 #' tree.age.combine(ages_A,ages_B)->ages
 
 tree.age.combine<-function(ages0,ages1){
+
+word<-function(x, sep=" ", n="last",...){#extracts word n (or "last" for last word of each) from a string.
+if(length(sep)<length(x)) rep(sep,length(x))->sep
+if(length(n)<length(x)) rep(n,length(x))->n
+out<-numeric()
+for(i in 1:length(x)){
+if(length(strsplit(x[i], sep,...)[[1]])==1){out[i]<-x[i]}else{
+n[i]->n_
+if(n[i]=="last") n_<-length(strsplit(x[i], sep,...)[[1]])
+strsplit(x[i], sep[i])[[1]]->t
+t[as.numeric(n_)]->out[i]
+}
+}
+return(out)
+}
+
 
 rownames(ages0)->orownames
 
@@ -1620,7 +1695,7 @@ which(rownames(ages1)==rownames(ages0)[i])->w
 if(length(w)>0){
 ages1[w,1]->ages0[i,1]
 }else{
-
+##XXX #edit this to be more rigorous in taxon-matching
 which(stringr::word(rownames(ages1),1)==stringr::word(rownames(ages0)[i],1))->w
 if(length(w)>0){
 ages1[w,1]->ages0[i,1]
@@ -1633,6 +1708,7 @@ which(rownames(ages1)==rownames(ages0)[i])->w
 if(length(w)>0){
 ages1[w,2]->ages0[i,2]
 }else{
+##XXX
 which(stringr::word(rownames(ages1),1)==stringr::word(rownames(ages0)[i],1))->w
 if(length(w)>0){
 ages1[w,2]->ages0[i,2]

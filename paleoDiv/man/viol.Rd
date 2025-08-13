@@ -10,7 +10,7 @@ viol(
   x2 = NULL,
   stat = density,
   dscale = 1,
-  cutoff = range(x),
+  cutoff = range(x, na.rm = TRUE),
   horiz = TRUE,
   add = TRUE,
   lim = cutoff,
@@ -20,7 +20,7 @@ viol(
   col = "black",
   lwd = 1,
   lty = 1,
-  na.rm = FALSE,
+  na.rm = TRUE,
   ...
 )
 }
@@ -55,7 +55,7 @@ viol(
 
 \item{lty}{Line width for the plotted violin}
 
-\item{na.rm}{logical indicating whether to remove NA values from input data.}
+\item{na.rm}{logical indicating whether to remove NA values from input data (defaults to TRUE).}
 
 \item{...}{Other arguments to be passed on to function in parameter stat}
 }
