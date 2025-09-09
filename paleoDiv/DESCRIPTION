@@ -1,6 +1,6 @@
 Package: paleoDiv
 Title: Extracting and Visualizing Paleobiodiversity
-Version: 0.4.7
+Version: 0.4.8
 Authors@R: 
     person("Darius", "Nau", , "dariusnau@gmx.at", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0000-4343-6830"))

@@ -1,3 +1,6 @@
+# paleoDiv 0.4.8
+* fixed handling of update dataframes by ts.periods
+
 # paleoDiv 0.4.7
 * fixed handling of missing values by tree.ages.spp()
 * improved occ.cleanup filtering presets
