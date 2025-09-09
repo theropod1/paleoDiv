@@ -1158,7 +1158,7 @@ return(table)
 divdistr_<-function(x, table=NULL,w=rep(1,length(x)),smooth=0, max=table$max, min=table$min){
 
     divdistr<-function(x,table=NULL, min=table$min, max=table$max){
-which(min<=x)->a
+which(min<x)->a
 which(max>=x)->b
 intersect(a,b)->id
 length(id)->length
@@ -1213,7 +1213,7 @@ abdistr_<-function(x, table=NULL, ab.val=table$abund_value,ab.val.na=1, smooth=0
     }
     }}#make sure that abundance values exist
     
-    which(as.numeric(min)<=x)->a
+    which(as.numeric(min)<x)->a
     which(as.numeric(max)>=x)->b
     intersect(a,b)->id
 

@@ -7,7 +7,6 @@ divdistr_(c(195,185,175),table=testdf)->testres#make a taxon-range table manuall
   expect_equal(testres[2], 2)
   expect_equal(testres[3], 1)
   
-  expect_equal(divdistr_(c(180),table=testdf), 3)
-
+  expect_equal(divdistr_(c(180),table=testdf), 1)
 
   })
