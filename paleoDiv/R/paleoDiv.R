@@ -154,13 +154,15 @@ return(x_)
 #' @param plusminus Criterium for the width (in x0) of the interval over which rolling mean values are to be calculated. Value represents the margin as calculated from every value of x1 or x0, i.e. for a plusminus==5, the interval over which the means are drawn will range from values with x-x_i=5 to x-x_i=-5.
 #' @param weighting Whether or not to apply weighting. If weighting==TRUE, then means are calculated as weighted means with weighting decreasing linearly towards the margins of the interval over which the mean is to be drawn.
 #' @param weightdiff Minimum weight to be added to all weights if weighting==TRUE. Defaults to 0.
+#' @param prevent.nas logical indicating whether na’s should be prevented by using the closest available value as a filler in cases where there are zero values that fall into the window defined by the plusminus parameter
+#' @param tolerance tolerance to add to the plusminus parameter when determining points that fall inside the selection window
 #' @return A numeric vector of the same length as either x1 (if not NULL) or x0, containing the calculated rolling means.
 #' @importFrom stats weighted.mean
 #' @export rmeana
 #' @examples
 #' rmeana(x0=c(1,2,3,4,5,6), y0=c(2,3,3,4,5,6))
 
-rmeana<-function(x0, y0, x1=NULL, plusminus=5, weighting=FALSE,weightdiff=0){
+rmeana<-function(x0, y0, x1=NULL, plusminus=5, weighting=FALSE,weightdiff=0, prevent.nas=FALSE, tolerance=1e-6){
 
 if(is.null(x1)){
 x_<-x0
@@ -171,7 +173,9 @@ y_<-rep(NA,length(x_))
 
 for(i in 1:length(x_)){
 
-indices<-which(abs(as.numeric(x0-x_[i]))<=plusminus)
+tol <- plusminus + tolerance
+indices<-which(abs(as.numeric(x0-x_[i]))<=tol)
+   if(prevent.nas) if (length(indices) == 0) indices <- which.min(abs(x0 - x_[i]))
 
 if(weighting==TRUE){
 

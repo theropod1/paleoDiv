@@ -1,3 +1,9 @@
+# paleoDiv 0.4.10
+* fixed incorrect/misleading multiplication of tolerance factors in rmeana()
+
+# paleoDiv 0.4.9
+* added option to rmeana to handle empty/missing values
+
 # paleoDiv 0.4.8
 * fixed handling of update dataframes by ts.periods
 

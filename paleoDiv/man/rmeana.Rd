@@ -4,7 +4,15 @@
 \alias{rmeana}
 \title{Calculate a rolling mean based on distance within a second variable.}
 \usage{
-rmeana(x0, y0, x1 = NULL, plusminus = 5, weighting = FALSE, weightdiff = 0)
+rmeana(
+  x0,
+  y0,
+  x1 = NULL,
+  plusminus = 5,
+  weighting = FALSE,
+  weightdiff = 0,
+  prevent.nas = FALSE
+)
 }
 \arguments{
 \item{x0}{Numeric independent variable at which rolling mean is to be calculated.}
@@ -18,6 +26,8 @@ rmeana(x0, y0, x1 = NULL, plusminus = 5, weighting = FALSE, weightdiff = 0)
 \item{weighting}{Whether or not to apply weighting. If weighting==TRUE, then means are calculated as weighted means with weighting decreasing linearly towards the margins of the interval over which the mean is to be drawn.}
 
 \item{weightdiff}{Minimum weight to be added to all weights if weighting==TRUE. Defaults to 0.}
+
+\item{prevent.nas}{logical indicating whether na’s should be prevented by using the closest available value as a filler in cases where there are zero values that fall into the window defined by the plusminus parameter}
 }
 \value{
 A numeric vector of the same length as either x1 (if not NULL) or x0, containing the calculated rolling means.
