@@ -8,7 +8,7 @@ ts.periods(
   phylo = NULL,
   alpha = 1,
   names = TRUE,
-  exclude = c("Quarternary"),
+  exclude = c("Quaternary"),
   col.txt = NULL,
   border = NA,
   ylim = NULL,

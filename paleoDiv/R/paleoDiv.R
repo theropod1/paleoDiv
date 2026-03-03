@@ -414,7 +414,13 @@ range(x,na.rm=TRUE)->rx
 levels(factor(group))->cat
 length(cat)->ncat
 
-if(!is.null(order)) cat[order]->cat
+if(!is.null(order)){#print(cat)
+if(length(cat)!=length(order)) warning("order provided but does not match number of factor levels")
+
+cat[order]->cat
+#print(cat)
+
+}
 
 ##visual settings
 if(length(col)<ncat) rep(col,ncat)[1:ncat]->col
@@ -562,7 +568,9 @@ invisible(data.frame(x,y))
 #' @param adj adjustment for axis labels (defaults to c(1,0), i.e. top right)
 #' @param add logical whether to add to existing plot (default: TRUE)
 #' @param italicize.cat Logical indicating whether category labels should be italicized (defaults to FALSE)
+#' @param plot logical indicating whether plotting should be performed (default TRUE)
 #' @param ... other arguments to pass on to jitterp() and plot()
+#' @return an invisible object containing all points plotted. If plot==FALSE, a data.frame is returned containing the x and y values as well as the (row-)indices of the points in the same order as the original vector x, otherwise a list() is returned containing the points for each category in the multijitter plot.
 #' @importFrom graphics axis
 #' @importFrom graphics mtext
 #' @export multijitter
@@ -571,7 +579,7 @@ invisible(data.frame(x,y))
 #' multijitter(p~cat,d, add=FALSE)
 ##pchs, cols, cexs, alphas for point-specific plotting
 
-multijitter<-function(x, data=NULL, group=NULL, horiz=FALSE, order=NULL, xlab="", ylab="", col="black", pch=16, spaces="_", width=0.1, xlim=NULL, ylim=NULL,add=TRUE,ax=FALSE,srt=45, italicize.cat=FALSE, adj=c(1,0),...){
+multijitter<-function(x, data=NULL, group=NULL, horiz=FALSE, order=NULL, xlab="", ylab="", col="black", pch=16, spaces="_", width=0.1, xlim=NULL, ylim=NULL,add=TRUE,ax=FALSE,srt=45, italicize.cat=FALSE, adj=c(1,0),plot=TRUE,...){
 if(ax){
 pr<-function(axis="x"){#helper function plotr for label plotting
 if(axis=="x"){
@@ -612,8 +620,16 @@ range(x,na.rm=TRUE)->rx
 levels(factor(group))->cat
 length(cat)->ncat
 
-if(!is.null(order)) cat[order]->cat
+#if(!is.null(order)) cat[order]->cat
+if(!is.null(order)){#print(cat)
+if(length(cat)!=length(order)) warning("order provided but does not match number of factor levels")
 
+cat[order]->cat
+#print(cat)
+
+}
+
+if(plot){
 ##visual settings
 if(length(col)<ncat) rep(col,ncat)[1:ncat]->col
 if(length(pch)<ncat) rep(pch,ncat)[1:ncat]->pch
@@ -634,7 +650,7 @@ if(add==FALSE) plot(NA,type="n", axes=F, ylim=ylim, xlim=xlim,xlab=xlab, ylab=yl
 out<-list()
 
 ##add jitterplots
-if(horiz==T){#horizontal viols
+if(horiz==TRUE){#horizontal viols
 for(i in 1:ncat){#loop
 
 
@@ -669,6 +685,18 @@ namcat<-cat
 if(italicize.cat) namcat <- parse(text = paste0("italic('", namcat, "')"))
 text(y=par("usr")[3]-pr("y")*0.015,xpd=T, srt=srt, adj=adj, x=c(1:ncat), col=col, namcat)
 
+}
+
+}
+}else{#if no plotting is desired
+
+if(horiz) out<-data.frame(x=x,y=NA,group=group) else out<-data.frame(x=NA,y=x,group=group)
+
+for(i in 1:length(cat)){
+which(out$group==cat[i]) -> i_
+
+jittered_value <- rep(i, length(i_)) + rnorm(n = length(i_), mean = 0, sd = width)
+if(horiz) jittered_value->out$y[i_] else jittered_value->out$x[i_]
 }
 
 }
@@ -724,7 +752,7 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 #' ape::plot.phylo(tree_archosauria)
 #' ts.periods(tree_archosauria, alpha=0.5)
 
-ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quarternary"),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
+ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quaternary"),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
   ## Data for geological periods
   
 if(!is.null(update)){
@@ -735,9 +763,9 @@ if(is.data.frame(update)) update->ts #custom/updated time scale import
   
   }else{
   periods <- data.frame(
-    period = c("Quarternary", "Neogene", "Paleogene", "Cretaceous", "Jurassic", "Triassic", "Permian", "Carboniferous", "Devonian", "Silurian", "Ordovician", "Cambrian","Ediacaran"),
-    start = c(0, 2.58, 23.03, 66, 145, 201.3, 252.17, 298.9, 358.9, 419.2, 443.8, 485.4,541),
-    end = c(2.58, 23.03, 66, 145, 201.3, 252.17, 298.9, 358.9, 419.2, 443.8, 485.4, 541,635), col = paste0("#",c("F9F97F","FFE619","FD9A52","7FC64E","34B2C9","812B92","F04028","67A599","CB8C37","B3E1B6","009270","7FA056","FED96A")))
+    period = c("Quaternary", "Neogene", "Paleogene", "Cretaceous", "Jurassic", "Triassic", "Permian", "Carboniferous", "Devonian", "Silurian", "Ordovician", "Cambrian","Ediacaran"),
+    start = c(0,2.58,23.04,66,143.1,201.4,251.9,298.9,358.9,419.62,443.1,486.85,538.8),
+    end = c(2.58,23.04,66,143.1,201.4,251.9,298.9,358.9,419.62,443.1,486.85,538.8,635), col = paste0("#",c("F9F97F","FFE619","FD9A52","7FC64E","34B2C9","812B92","F04028","67A599","CB8C37","B3E1B6","009270","7FA056","FED96A")))
   }
   
   
@@ -810,6 +838,7 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
 #' @param phylo Optional (calibrated) phylogeny to which to add timescale. If phylogeny is provided, the $root.time variable is used to convert ages so that the time scale will fit the phylogeny.
 #' @param alpha Opacity value to use for the fill of the time scale
 #' @param names Logical indicating whether to plot stage names (defaults to FALSE)
+#' @param exclude Character vector listing stages for which to not plot the names, if names==TRUE
 #' @param col.txt Color(s) to use for labels.
 #' @param border Color to use for the border of the timescale
 #' @param ylim Setting for height of the timescale. Can either be one single value giving the height of the timescale, in which case the function attempts to use the lower limit of the current plot as the lower margin, or a vector of length 2 containing the lower and upper limits of the timescale.
@@ -833,7 +862,7 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
 #' ts.periods(tree_archosauria, alpha=0)
 
 
-ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
+ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,exclude=c('Meghalayan','Northgrippian','Greenlandian','Late Pleistocene'),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
   ##Data for geological periods
   if(!is.null(update)){
 if(!is.data.frame(update) & is.character(update)) read.csv(update)->ts #custom/updated time scale import
@@ -841,7 +870,7 @@ if(is.data.frame(update)) update->ts #custom/updated time scale import
 
 intervals<-data.frame(interval=ts$stage, start=ts$bottom, end=ts$top, col=ts$col)
   }else{
-    intervals<-data.frame(interval=c('Avalon Assemblage', 'White Sea Assemblage', 'Nama Assemblage', 'Fortunian', 'Stage 2', 'Stage 3', 'Stage 4', 'Wulian', 'Drumian', 'Guzhangian', 'Paibian', 'Jiangshanian', 'Stages 10', 'Tremadocian', 'Floian', 'Dapingian', 'Darriwilian', 'Sandbian', 'Katian', 'Hirnantian', 'Rhuddanian', 'Aeronian', 'Telychian', 'Sheinwoodian', 'Homerian', 'Gorstian', 'Ludfordian', 'Pridoli', 'Lochkovian', 'Pragian', 'Emsian', 'Eifelian', 'Givetian', 'Frasnian', 'Famennian', 'Tournaisian', 'Visean', 'Serpukhovian', 'Bashkirian', 'Moscovian', 'Kasimovian', 'Gzhelian', 'Asselian', 'Sakmarian', 'Artinskian', 'Kungurian', 'Roadian', 'Wordian', 'Capitanian', 'Wuchiapingian', 'Changhsingian', 'Induan', 'Olenekian', 'Anisian', 'Ladinian', 'Carnian', 'Norian', 'Rhaetian', 'Hettangian', 'Sinemurian', 'Pliensbachian', 'Toarcian', 'Aalenian', 'Bajocian', 'Bathonian', 'Callovian', 'Oxfordian', 'Kimmeridgian', 'Tithonian', 'Berriasian', 'Valanginian', 'Hauterivian', 'Barremian', 'Aptian', 'Albian', 'Cenomanian', 'Turonian', 'Coniacian', 'Santonian', 'Campanian', 'Maastrichtian', 'Danian', 'Selandian-Thanetian', 'Ypresian', 'Lutetian', 'Bartonian', 'Priabonian', 'Rupelian', 'Chattian', 'Lower Miocene', 'Middle Miocene', 'Upper Miocene', 'Pliocene', 'Pleistocene', 'Holocene'),start=c(580, 560, 550, 538.8, 529, 521, 514.5, 509, 504.5, 500.5, 497, 494.2, 491, 486.85, 477.08, 471.26, 469.42, 458.18, 452.75, 445.21, 443.07, 440.49, 438.59, 432.93, 430.62, 426.74, 425.01, 422.73, 419, 412.4, 410.51, 394.3, 385.3, 378.9, 371.1, 359.3, 346.73, 330.34, 323.4, 315.15, 307.02, 303.68, 298.89, 293.52, 290.51, 283.3, 274.37, 269.21, 264.34, 259.55, 254.24, 251.9, 249.88, 246.7, 241.46, 237, 227.3, 209.51, 201.36, 199.46, 192.9, 184.2, 174.7, 170.9, 168.17, 165.29, 161.53, 154.78, 149.24, 143.1, 137.7, 132.6, 126.5, 121.4, 113.2, 100.5, 93.9, 89.39, 85.7, 83.65, 72.17, 66.04, 61.66, 56, 48.07, 41.03, 37.71, 33.9, 27.29, 23.04, 15.99, 11.63, 5.33, 2.59, 0.0117), end=c(560, 550, 538.8, 529, 521, 514.5, 509, 504.5, 500.5, 497, 494.2, 491, 486.85, 477.08, 471.26, 469.42, 458.18, 452.75, 445.21, 443.07, 440.49, 438.59, 432.93, 430.62, 426.74, 425.01, 422.73, 419, 412.4, 410.51, 394.3, 385.3, 378.9, 371.1, 359.3, 346.73, 330.34, 323.4, 315.15, 307.02, 303.68, 298.89, 293.52, 290.51, 283.3, 274.37, 269.21, 264.34, 259.55, 254.24, 251.9, 249.88, 246.7, 241.46, 237, 227.3, 209.51, 201.36, 199.46, 192.9, 184.2, 174.7, 170.9, 168.17, 165.29, 161.53, 154.78, 149.24, 143.1, 137.7, 132.6, 126.5, 121.4, 113.2, 100.5, 93.9, 89.39, 85.7, 83.65, 72.17, 66.04, 61.66, 56, 48.07, 41.03, 37.71, 33.9, 27.29, 23.04, 15.99, 11.63, 5.33, 2.59, 0.0117, 0),col=c('#fcd589', '#fdd587', '#fed583', '#a9be93', '#b6c29e', '#b5ca9f', '#c0ceaa', '#c1d6af', '#cddbb8', '#d6e1c1', '#d8e8c4', '#e4efcf', '#edf2db', '#0dac98', '#0eb1a0', '#67c0ae', '#79c5b8', '#9bceaf', '#a6d5c3', '#b6d9c3', '#b3dccc', '#c1e1d6', '#cae8e0', '#cce7d8', '#d6ebe2', '#d6ecea', '#e2f1ec', '#ebf5ec', '#eac378', '#ebcd87', '#edd595', '#f5da93', '#f5e2a0', '#f4edc3', '#f4f0d5', '#9db989', '#b7c089', '#cdc888', '#a6c9cd', '#bed3ce', '#cad8d9', '#d6dcda', '#e07f6c', '#e18a76', '#e39684', '#e49f90', '#f49984', '#f4a692', '#f6af9b', '#fac4b8', '#facfc6', '#b266a6', '#bb71ac', '#c793c3', '#d0a0c8', '#d1b3d5', '#dbc1de', '#e5cbe4', '#22b5e9', '#5ebeee', '#86c9f3', '#a3d1f3', '#a2d8f0', '#b0dff1', '#bce3f2', '#cae6f2', '#cce8fd', '#d4eefd', '#e0f2fc', '#9ec979', '#a8d182', '#b7d690', '#c2da9c', '#cfe1a7', '#d9e8b1', '#c6d86c', '#d2dd77', '#dce383', '#e5e88f', '#efec9b', '#f5f1a7', '#fbc27f', '#fccb87', '#f7ba8e', '#f9c39f', '#fcceac', '#fcd7ba', '#fedfb3', '#ffeac3', '#fff14a', '#fef26b', '#fef488', '#fff7b2', '#fff2c5', '#fff5eb'))
+    intervals<-data.frame(interval=c('Meghalayan','Northgrippian','Greenlandian','Late Pleistocene','Chibanian','Calabrian','Gelasian','Piacenzian','Zanclean','Zanclean','Messinian','Tortonian','Serravallian','Langhian','Burdigalian','Aquitanian','Chattian','Rupelian','Priabonian','Bartonian','Lutetian','Ypresian','Thanetian','Selandian','Danian','Maastrichtian','Campanian','Santonian','Coniacian','Turonian','Cenomanian','Albian','Aptian','Barremian','Hauterivian','Valanginian','Berriasian','Tithonian','Kimmeridgian','Oxfordian','Callovian','Bathonian','Bajocian','Aalenian','Toarcian','Pliensbachian','Sinemurian','Hettangian','Rhaetian','Norian','Carnian','Ladinian','Anisian','Olenekian','Induan','Changhsingian','Wuchiapingian','Capitanian','Wordian','Kungurian','Roadian','Artinskian','Sakmarian','Asselian','Gzhelian','Kasimovian','Moscovian','Bashkirian','Serpukhovian','Visean','Tournaisian','Famennian','Frasnian','Givetian','Eifelian','Emsian','Pragian','Lochkovian','Pridoli','Ludfordian','Gorstian','Homerian','Sheinwoodian','Telychian','Aeronian','Rhuddanian','Hirnantian','Katian','Sandbian','Darriwilian','Dapingian','Floian','Tremadocian','Cambrian 10','Jiangshanian','Paibian','Guzhangian','Drumian','Wuliuan','Cambrian 4','Cambrian 3','Cambrian 2','Fortunian','Ediacaran','Cryogenian'), start=c(0.0042,0.0082,0.0117,0.129,0.774,1.8,2.58,3.6,5.333,5.333,7.246,11.63,13.82,15.98,20.45,23.04,27.3,33.9,37.71,41.03,48.07,56,59.24,61.66,66,72.2,83.6,85.7,89.8,93.9,100.5,113.2,121.4,125.77,132.6,137.05,143.1,149.2,154.8,161.5,165.3,168.3,170.3,174.7,182.7,190.8,199.3,201.4,205.7,227.3,237,241.464,247.2,249.9,251.9,254.14,259.8,265.1,268.8,272.3,274.4,283.5,295,298.9,303.7,307,315.2,323.2,330.9,346.7,358.9,372.2,382.7,387.7,393.3,407.6,410.8,419.62,422.7,425,426.7,430.6,432.9,438.6,440.5,443.1,445.2,452.8,458.2,469.4,471.3,477.1,486.85,491,494.2,497,500.5,504.5,506.5,514.5,521,529,538.8,635,720), end=c(1e-07,0.0042,0.0082,0.0117,0.129,0.774,1.8,2.58,3.6,5.333,5.333,7.246,11.63,13.82,15.98,20.45,23.04,27.3,33.9,37.71,41.03,48.07,56,59.24,61.66,66,72.2,83.6,85.7,89.8,93.9,100.5,113.2,121.4,125.77,132.6,137.05,143.1,149.2,154.8,161.5,165.3,168.3,170.3,174.7,182.7,190.8,199.3,201.4,205.7,227.3,237,241.464,247.2,249.9,251.9,254.14,259.8,265.1,268.8,272.3,274.4,283.5,295,298.9,303.7,307,315.2,323.2,330.9,346.7,358.9,372.2,382.7,387.7,393.3,407.6,410.8,419.62,422.7,425,426.7,430.6,432.9,438.6,440.5,443.1,445.2,452.8,458.2,469.4,471.3,477.1,486.85,491,494.2,497,500.5,504.5,506.5,514.5,521,529,538.8,635),col=c('#FDEDEC','#FDECE4','#FEECDB','#FFF2D3','#FFF2C7','#FFF2BA','#FFEDB3','#FFFFBF','#FFFFB3','#FFFFB3','#FFFF73','#FFFF66','#FFFF59','#FFFF4D','#FFFF41','#FFFF33','#FEE6AA','#FED99A','#FDCDA1','#FDC091','#FDB482','#FCA773','#FDBF6F','#FEBF65','#FDB462','#F2FA8C','#E6F47F','#D9EF74','#CCE968','#BFE35D','#B3DE53','#CCEA97','#BFE48A','#B3DF7F','#A6D975','#99D36A','#8CCD60','#D9F1F7','#CCECF4','#BFE7F1','#BFE7E5','#B3E2E3','#A6DDE0','#9AD9DD','#99CEE3','#80C5DD','#67BCD8','#4EB3D3','#E3B9DB','#D6AAD3','#C99BCB','#C983BF','#BC75B7','#B051A5','#A4469F','#FCC0B2','#FCB4A2','#FB9A85','#FB8D76','#E38776','#FB8069','#E37B68','#E36F5C','#E36350','#CCD4C7','#BFD0C5','#B3CBB9','#99C2B5','#BFC26B','#A6B96C','#8CB06C','#F2EDB3','#F2EDAD','#F1E185','#F1D576','#E5D075','#E5C468','#E5B75A','#E6F5E1','#D9F0DF','#CCECDD','#CCEBD1','#BFE6C3','#BFE6CF','#B3E1C2','#A6DCB5','#A6DBAB','#99D69F','#8CD094','#74C69C','#66C092','#41B087','#33A97E','#E6F5C9','#D9F0BB','#CCEBAE','#CCDFAA','#BFD99D','#B3D492','#B3CA8E','#A6C583','#A6BA80','#99B575','#FED96A','#FECC5C'))
 }
 
 if(unit=="ka" | unit==1000){
@@ -880,6 +909,7 @@ lastPP <- par("usr")[3:4]#get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
 c(min(lastPP),min(lastPP)+ylim)->ylim
 }
 
+if(length(col.txt)>nrow(intervals)) rep(col.txt,nrow(intervals))[1:nrow(intervals)]
 #loop through polygons
   for (i in 1:nrow(intervals)) {
     ###
@@ -898,12 +928,8 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
     ###
     }
     
-    if(names==TRUE){
-    if(length(col.txt)>1){
-    text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt[i],...)}else{
-    text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt,...)
-    }
-    }
+    if(names==TRUE && !(intervals$interval[i]%in%exclude)) text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt[i],...)
+    
   }
 
 }

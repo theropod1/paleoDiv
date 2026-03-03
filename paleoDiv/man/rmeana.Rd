@@ -11,7 +11,8 @@ rmeana(
   plusminus = 5,
   weighting = FALSE,
   weightdiff = 0,
-  prevent.nas = FALSE
+  prevent.nas = FALSE,
+  tolerance = 1e-06
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ rmeana(
 \item{weightdiff}{Minimum weight to be added to all weights if weighting==TRUE. Defaults to 0.}
 
 \item{prevent.nas}{logical indicating whether na’s should be prevented by using the closest available value as a filler in cases where there are zero values that fall into the window defined by the plusminus parameter}
+
+\item{tolerance}{tolerance to add to the plusminus parameter when determining points that fall inside the selection window}
 }
 \value{
 A numeric vector of the same length as either x1 (if not NULL) or x0, containing the calculated rolling means.

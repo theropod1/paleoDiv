@@ -1,3 +1,7 @@
+# paleoDiv 0.4.11
+* added "plot" parameter to multijitter(); if plot==FALSE, jitterplot is not plotted and only an invisible object containing all points, in original order, is returned.
+* updated ts.periods and ts.stages with the most recent version (24/10) of the international stratigraphic chart
+
 # paleoDiv 0.4.10
 * fixed incorrect/misleading multiplication of tolerance factors in rmeana()
 

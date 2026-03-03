@@ -23,6 +23,7 @@ multijitter(
   srt = 45,
   italicize.cat = FALSE,
   adj = c(1, 0),
+  plot = TRUE,
   ...
 )
 }
@@ -63,7 +64,12 @@ multijitter(
 
 \item{adj}{adjustment for axis labels (defaults to c(1,0), i.e. top right)}
 
+\item{plot}{logical indicating whether plotting should be performed (default TRUE)}
+
 \item{...}{other arguments to pass on to jitterp() and plot()}
+}
+\value{
+an invisible object containing all points plotted. If plot==FALSE, a data.frame is returned containing the x and y values as well as the (row-)indices of the points in the same order as the original vector x, otherwise a list() is returned containing the points for each category in the multijitter plot.
 }
 \description{
 Wrapper around jitterp that plots multiple jitter plots on the same plotting device (analogous to violins())

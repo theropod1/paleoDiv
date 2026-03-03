@@ -8,6 +8,7 @@ ts.stages(
   phylo = NULL,
   alpha = 1,
   names = FALSE,
+  exclude = c("Meghalayan", "Northgrippian", "Greenlandian", "Late Pleistocene"),
   col.txt = NULL,
   border = NA,
   ylim = NULL,
@@ -26,6 +27,8 @@ ts.stages(
 \item{alpha}{Opacity value to use for the fill of the time scale}
 
 \item{names}{Logical indicating whether to plot stage names (defaults to FALSE)}
+
+\item{exclude}{Character vector listing stages for which to not plot the names, if names==TRUE}
 
 \item{col.txt}{Color(s) to use for labels.}
 
