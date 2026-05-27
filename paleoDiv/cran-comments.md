@@ -1,13 +1,13 @@
 # devtools::check_win_devel()
-Check time in seconds: 72
+Installation time in seconds: 8
+Check time in seconds: 112
 Status: OK
-R version 4.5.0 alpha (2025-03-22 r88035 ucrt)
-
-# devtools::check(cran=TRUE)
-   
-── R CMD check results ───────────────────────────────────────────────────── paleoDiv 0.4.6 ────
-Duration: 1m 33.2s
-
-0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+R Under development (unstable) (2026-05-26 r90080 ucrt)
 
 # R CMD check --as-cran
+* using R version 4.5.1 (2025-06-13)
+* using platform: x86_64-pc-linux-gnu
+* R was compiled by
+    gcc (Debian 10.2.1-6) 10.2.1 20210110
+    GNU Fortran (Debian 10.2.1-6) 10.2.1 20210110
+Status: OK

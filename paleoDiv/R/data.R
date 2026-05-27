@@ -11,7 +11,7 @@
 #'
 #' A dataset containing earliest and latest occurrence dates for clades shown in the example phylogeny.
 #'
-#' @format A matrix with 13 rows and 2 collumns containing:
+#' @format A matrix with 13 rows and 2 columns containing:
 #' \describe{
 #'   \item{FAD}{Earliest occurrence age}
 #'   \item{LAD}{Latest occurrence age}
@@ -43,7 +43,7 @@
 #' \describe{
 #'   \item{x_orig}{ages for each stage in the phanerozoic}
 #'   \item{x}{ages converted for plotting on tree_archosauria, using the tsconv()-function}
-#'   \item{Sauroporomorpha}{diversity by stage for Sauropodomorpha}
+#'   \item{Sauropodomorpha}{diversity by stage for Sauropodomorpha}
 #'   \item{etc}{diversity by stage for each of the taxa represented in tree_archosauria}
 #'   ...
 #' }

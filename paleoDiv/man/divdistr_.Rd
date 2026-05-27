@@ -2,7 +2,7 @@
 % Please edit documentation in R/paleoDiv.R
 \name{divdistr_}
 \alias{divdistr_}
-\title{Calculate total species diversity for any point in time based on a taxon-range table}
+\title{Calculate total range-through taxon richness for any point in time based on a taxon-range table}
 \usage{
 divdistr_(
   x,
@@ -30,7 +30,7 @@ divdistr_(
 A numeric vector containing taxon diversity (at the chosen taxonomic level used in the generation of the range table) at the provided ages.
 }
 \description{
-Calculate total species diversity for any point in time based on a taxon-range table
+Calculate total range-through taxon richness for any point in time based on a taxon-range table
 }
 \details{
 divdistr_() produces a "maximum" estimate of taxonomic diversity at any given point in time in the fossil record. This function is based on the principle of counting the number of taxon ranges (from the provided range table) that overlap each age provided in x. As a result of uncertainty of age estimates, this may lead to an overestimation of the actual fossil diversity at each point in time, especially at the points of overlap between taxon-specific ranges. Moreover this represents a "raw", uncorrected diversity estimate that does not account for differences in sampling intensity throughout the time interval that is investigated. A rudimentary functionality for using such a correction exists in the form of the w argument, which allows the user to provide a vector of weights (of the same length as x) to be multiplied with the raw diversity estimates. Such weights can, for instance, be based on (the inverse of) the number of collections overlapping any given age in x, which can be calculated using the same basic approach as the raw diversity, by downloading collections instead of occurrence data.

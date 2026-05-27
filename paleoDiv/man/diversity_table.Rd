@@ -9,7 +9,7 @@ A data.frame() containing mean ages and diversity figures by stage.
 \describe{
 \item{x_orig}{ages for each stage in the phanerozoic}
 \item{x}{ages converted for plotting on tree_archosauria, using the tsconv()-function}
-\item{Sauroporomorpha}{diversity by stage for Sauropodomorpha}
+\item{Sauropodomorpha}{diversity by stage for Sauropodomorpha}
 \item{etc}{diversity by stage for each of the taxa represented in tree_archosauria}
 ...
 }

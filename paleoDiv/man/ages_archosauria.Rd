@@ -5,7 +5,7 @@
 \alias{ages_archosauria}
 \title{ages_archosauria}
 \format{
-A matrix with 13 rows and 2 collumns containing:
+A matrix with 13 rows and 2 columns containing:
 \describe{
 \item{FAD}{Earliest occurrence age}
 \item{LAD}{Latest occurrence age}

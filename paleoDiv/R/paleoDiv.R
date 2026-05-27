@@ -446,7 +446,7 @@ if(length(wt)<length(x)) wt<-rep(wt,length(x))[1:length(x)]
 if(add==FALSE) plot(NA,type="n", axes=F, ylim=ylim, xlim=xlim,xlab=xlab, ylab=ylab,...)#base plot
 
 ##add viols
-if(horiz==T){#horizontal viols
+if(horiz){#horizontal viols
 for(i in 1:ncat){#loop
 
 if(length(x[group==cat[i]])>1){
@@ -1167,7 +1167,7 @@ return(table)
 
 
 ##Function divdistr_
-#'Calculate total species diversity for any point in time based on a taxon-range table
+#'Calculate total range-through taxon richness for any point in time based on a taxon-range table
 #'
 #' @param x A point in time or vector of points in time, in ma, at which species diversity is to be determined.
 #' @param table A taxon-range table to be used, usually the output of mk.sptab()
@@ -1811,6 +1811,7 @@ return(sptab_)
 #' @param add Logical indicating whether to add to an existing plot, in which case only the spindles are plotted on top of an existing phylogeny, or not, in which case the phylogeny is plotted along with the spindles.
 #' @param tbmar Top and bottom margin around the plot. Numeric of either length 1 or 2
 #' @param smooth Smoothing parameter to be passed on to divdistr_()
+#' @param tconv Logical indicating whether time scale conversion function (if any) should be applied to x column in occ, if it is a matrix or data.frame. Defaults to FALSE.
 #' @param italicize Character or numeric vector specifying which labels to italicize, if any.
 #' @return A plotted phylogeny with spindle diagrams plotted at each of its terminal branches.
 #' @details
@@ -1826,7 +1827,7 @@ return(sptab_)
 #' phylo.spindles(tree_archosauria,occ=archosauria,dscale=0.005,ages=ages_archosauria,txt.x=66)
 #' phylo.spindles(tree_archosauria,occ=diversity_table,dscale=0.005,ages=ages_archosauria,txt.x=66)
 
-phylo.spindles<-function(phylo0, occ, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, ylimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=NULL, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
+phylo.spindles<-function(phylo0, occ,tconv=FALSE, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, ylimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=NULL, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
 
 if(length(tbmar)==1){tbmar<-rep(tbmar,2)}#if only one value is given for tbmar, duplicate it. Otherwise, first value is bottom, second top
 if(inherits(phylo0,"phylo")){#setting for phylogenetic tree
@@ -1943,6 +1944,19 @@ if(length(weights)==1){
 weights<-rep(weights,length(seq(min(plot1$x.lim),max(plot1$x.lim),abs(res))))
 }
 
+
+if(is.matrix(occ) | is.data.frame(occ)){#select x column if data.frame or matrix with plotting stat is given.
+if(!("x" %in% colnames(occ))){warning("occ is a data.frame() or matrix(), but contains no column named x. Assuming first numeric column is x!")
+which(apply(occ,2,FUN=is.numeric)==TRUE)[1]->colX
+occ[,colX]->colX
+}else{
+occ[,"x"]->colX
+}
+if(is.logical(tconv) && tconv==TRUE) colX<--1 * (colX - phylo0$root.time)##XXXauto-convert x
+if(inherits(tconv,"phylo") && "root.time"%in%names(tconv)) colX<--1 * (colX - tconv$root.time)##XXX
+}
+
+
 ##loop through taxa/tip.labels
 for(i in 1:length(taxsel)){
 ##set spindle limits
@@ -2010,13 +2024,12 @@ if(exists("cutoff")){
 viol(plotx,pos=pos[i], stat=stat, table=itable, smooth=smooth, dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty,cutoff=cutoff,w=w)}else{
 viol(plotx,pos=pos[i], stat=stat, table=itable, smooth=smooth, dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty,w=w)} #plot with cutoff values if set, viol default if not
 
-}else if(is.matrix(occ) | is.data.frame(occ)){##if instead of a list object, a dataframe is given giving x and diversity values to plot (can also be co-opted to plot any other values, e.g. disparity
-if(!("x" %in% colnames(occ))){stop("if occ is a data.frame() or matrix(), it needs to have a column giving x values for plotting with column name == x")
-}
+}else if(is.matrix(occ) | is.data.frame(occ)){#if instead of a list object, a dataframe is given giving x and diversity values to plot (can also be co-opted to plot any other values, e.g. disparity)
+##XXX
 if(taxsel[i] %in% colnames(occ)){
 if(exists("cutoff")){
-viol(occ[,"x"], pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, cutoff=cutoff, w=w)}else{
-viol(occ[,"x"], pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, w=w)} #plot with cutoff values if set, viol default if not
+viol(colX, pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, cutoff=cutoff, w=w)}else{
+viol(colX, pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, w=w)} #plot with cutoff values if set, viol default if not
 }
 
 }

@@ -7,6 +7,7 @@
 phylo.spindles(
   phylo0,
   occ,
+  tconv = FALSE,
   stat = divdistr_,
   prefix = "sptab_",
   pos = NULL,
@@ -37,6 +38,8 @@ phylo.spindles(
 \item{phylo0}{A time-calibrated phylogenetic tree to plot with spindle diagrams, or a character vector of taxonomic names for which to plot spindle diagrams.}
 
 \item{occ}{Either a list()-object containing taxon-range tables for plotting diversity, or a matrix() or data.frame()-object that contains numerical plotting statistics. If the latter is provided, the default use of divdistr_() is overridden and the function will look for a column named "x" and columns matching the phylogeny tip.labels to plot the spindles.}
+
+\item{tconv}{Logical indicating whether time scale conversion function (if any) should be applied to x column in occ, if it is a matrix or data.frame. Defaults to FALSE.}
 
 \item{stat}{Plotting statistic to be passed on to viol(). Defaults to use divdistr_().}
 

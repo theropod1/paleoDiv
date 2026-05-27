@@ -1,3 +1,6 @@
+# paleoDiv 0.4.12
+* some additions to features of phylo_spindles() when handling matrices or data.frames as occ input; x column can now be automatically converted to conform to phylogenetic tree plotting space, if desired, via the tconv parameter
+
 # paleoDiv 0.4.11
 * added "plot" parameter to multijitter(); if plot==FALSE, jitterplot is not plotted and only an invisible object containing all points, in original order, is returned.
 * updated ts.periods and ts.stages with the most recent version (24/10) of the international stratigraphic chart
@@ -57,7 +60,7 @@
 
 # paleoDiv 0.2.5 (Release date: 2024-03-24)
 * added parameter 'italicize' to phylo.spindles, allowing automatic italicization of taxa given as indices or taxon names
-* improved color vector handling by phylo.spindles (colour vectors that are too short or long are now cycled or abridged automatically)
+* improved color vector handling by phylo.spindles (color vectors that are too short or long are now cycled or abridged automatically)
 
 # paleoDiv 0.2.4 (Release date: 2024-03-23)
 * added better customizability for phylo.spindles
@@ -88,7 +91,7 @@
 # paleoDiv 0.1.1 (Release date: 2024-03-02)
 ==============
 
-* improvement to tree.ages() (if data is not found) and added option for occ.cleanup() to return whole data.frame instead of mere collumn
+* improvement to tree.ages() (if data is not found) and added option for occ.cleanup() to return whole data.frame instead of mere column
 
 # paleoDiv v0.1.0 (Release date: 2024-03-01)
 ==============
