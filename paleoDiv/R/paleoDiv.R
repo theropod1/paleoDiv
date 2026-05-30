@@ -724,6 +724,7 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 }
 ##
 
+
 ##Function ts.periods 
 #'Add a horizontal, period-level phanerozoic timescale to any plot, especially calibrated phylogenies plotted with ape.
 #'
@@ -740,6 +741,8 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 #' @param update data.frame() object or character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named periods, bottom, top and col, giving the period names, start time in ma, end time in ma and a valid color value, respectively.
 #' @param unit what unit of time to use. Defaults to "ma" (million years), other possible settings are "ka" or 1000 (for thousands of years), or "a", 1 or "years" for years.
 #' @param abbr Number of characters to abbreviate each name to, defaults to "all"
+#' @param horiz Plot horizontally? (default TRUE) If FALSE, all settings for the vertical dimension instead refer to the horizontal.
+#' @param srt.txt text rotation. If NULL (default) then this gets set to 0 degrees (horizontal plotting) or 90 degrees (vertical plotting)
 #' @param ... additional arguments to pass on to text()
 #' @return Plots a timescale on the currently active plot.
 #' @importFrom graphics text
@@ -752,7 +755,7 @@ tsconv<-function(x,phylo0=NULL,root.time=phylo0$root.time){
 #' ape::plot.phylo(tree_archosauria)
 #' ts.periods(tree_archosauria, alpha=0.5)
 
-ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quaternary"),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
+ts.periods <- function(phylo=NULL,alpha=1,names=TRUE,exclude=c("Quaternary"),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",horiz=TRUE,srt.txt=NULL,...){
   ## Data for geological periods
   
 if(!is.null(update)){
@@ -790,38 +793,52 @@ periods$end<-tsconv(periods$end,phylo)
   if(is.null(col.txt)){col.txt<-periods$col}#set text color, is unset
 #regulate limits
 if(is.null(ylim)){
-ylim <- par("usr")[3:4]
+if(horiz) ylim <- par("usr")[3:4] else  ylim <- par("usr")[1:2]
 ylim[2] <- ylim[1]+diff(ylim)/20
 }
   
 if(length(ylim)==1){
-lastPP <- par("usr")[3:4]#get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
+if(horiz) lastPP <- par("usr")[3:4] else lastPP <- par("usr")[1:2]
 c(min(lastPP),min(lastPP)+ylim)->ylim
 }
 
+if(length(col.txt)==1) col.txt<-rep(col.txt,nrow(periods)) #vectorize text colors
+if(is.null(srt.txt)){if(horiz) srt.txt<-0 else srt.txt<-90} #set text rotation
+
+
 #loop through polygons
   for (i in 1:nrow(periods)) {
-    if(bw!=TRUE){polygon(
+    if(bw!=TRUE){
+    if(horiz) polygon(
       x=c(periods$start[i], periods$end[i], periods$end[i], periods$start[i]),
-      c(ylim[1], ylim[1], ylim[2], ylim[2]),
+      y=c(ylim[1], ylim[1], ylim[2], ylim[2]),
       col = add.alpha(periods$col[i],alpha=alpha),
       border = border
-    )}else if(bw==TRUE){
-    polygon(
-      x=c(periods$start[i], periods$end[i], periods$end[i], periods$start[i]),
-      c(ylim[1], ylim[1], ylim[2], ylim[2]),
-      col = "white",
+    ) else polygon(
+      y=c(periods$start[i], periods$end[i], periods$end[i], periods$start[i]),
+      x=c(ylim[1], ylim[1], ylim[2], ylim[2]),
+      col = add.alpha(periods$col[i],alpha=alpha),
       border = border
     )
+    
+    }else if(bw){
+    if(horiz) polygon(x=c(periods$start[i], periods$end[i], periods$end[i], periods$start[i]),
+      y=c(ylim[1], ylim[1], ylim[2], ylim[2]),
+      col = "white",
+      border = border
+    ) else polygon(y=c(periods$start[i], periods$end[i], periods$end[i], periods$start[i]),
+      x=c(ylim[1], ylim[1], ylim[2], ylim[2]),
+      col = "white",
+      border = border
+    ) 
     }
     
-    if(names==TRUE){
+    if(names){
+	
     if(periods$period[i] %in% exclude == FALSE){
+	
+    if(horiz) text(x=mean(c(periods$start[i],periods$end[i])),y=txt.y(ylim), adj=adj.txt,periods$period[i],col=col.txt[i],srt=srt.txt,...) else text(y=mean(c(periods$start[i],periods$end[i])),x=txt.y(ylim), adj=rev(adj.txt),periods$period[i],col=col.txt[i],srt=srt.txt,...)
     
-    if(length(col.txt)>1){#if text colors are given as vector
-    text(x=mean(c(periods$start[i],periods$end[i])),y=txt.y(ylim), adj=adj.txt,periods$period[i],col=col.txt[i],...)}else{#if single text color is given
-    text(x=mean(c(periods$start[i],periods$end[i])),y=txt.y(ylim), adj=adj.txt,periods$period[i],col=col.txt,...)
-    }
     }
     
     }
@@ -848,6 +865,8 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
 #' @param update Character string giving the filename of a .csv table for providing an updated timescale. If provided, the values for plotting the time scale are taken from the csv file instead of the internally provided values. Table must have columns named stage, bottom, top and col, giving the stage names, start time in ma, end time in ma and a valid color value, respectively.
 #' @param unit what unit of time to use. Defaults to "ma" (million years), other possible settings are "ka" or 1000 (for thousands of years), or "a", 1 or "years" for years.
 #' @param abbr Number of characters to abbreviate each name to, defaults to "all"
+#' @param horiz Plot horizontally? (default TRUE) If FALSE, all settings for the vertical dimension instead refer to the horizontal.
+#' @param srt.txt text rotation. If NULL (default) then this gets set to 0 degrees (horizontal plotting) or 90 degrees (vertical plotting)
 #' @param ... additional arguments to pass on to text()
 #' @return Plots a timescale on the currently active plot.
 #' @importFrom graphics text
@@ -862,7 +881,7 @@ c(min(lastPP),min(lastPP)+ylim)->ylim
 #' ts.periods(tree_archosauria, alpha=0)
 
 
-ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,exclude=c('Meghalayan','Northgrippian','Greenlandian','Late Pleistocene'),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",...){
+ts.stages <- function(phylo=NULL,alpha=1,names=FALSE,exclude=c('Meghalayan','Northgrippian','Greenlandian','Late Pleistocene'),col.txt=NULL,border=NA,ylim=NULL,adj.txt=c(0.5,0.5),txt.y=mean,bw=FALSE,update=NULL, unit="ma",abbr="n",horiz=TRUE,srt.txt=NULL,...){
   ##Data for geological periods
   if(!is.null(update)){
 if(!is.data.frame(update) & is.character(update)) read.csv(update)->ts #custom/updated time scale import
@@ -890,49 +909,59 @@ intervals$end<-tsconv(intervals$end,phylo)
   
   if(is.numeric(abbr)) intervals$interval<-paste0(substr(intervals$interval,0,abbr),".")
   
-  if(is.null(col.txt)){
-    col.txt<-intervals$col}
-    
-#if(length(ylim)==1 & !is.null(phylo)){
-#lastPP <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
-#c(min(lastPP$y.lim),ylim)->ylim
-#}else if(length(ylim)==1){ylim<-c(0,ylim)}
+  if(is.null(col.txt)){col.txt<-intervals$col}
 
 #regulate limits
 if(is.null(ylim)){
-ylim <- par("usr")[3:4]
+if(horiz) ylim <- par("usr")[3:4] else ylim <- par("usr")[1:2]
 ylim[2] <- ylim[1]+diff(ylim)/20
 }
   
 if(length(ylim)==1){
-lastPP <- par("usr")[3:4]#get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
+if(horiz) lastPP <- par("usr")[3:4] else lastPP <- par("usr")[1:2]
 c(min(lastPP),min(lastPP)+ylim)->ylim
 }
 
-if(length(col.txt)>nrow(intervals)) rep(col.txt,nrow(intervals))[1:nrow(intervals)]
+if(length(col.txt)>nrow(intervals)) rep(col.txt,nrow(intervals))[1:nrow(intervals)] #vectorize text colors
+if(is.null(srt.txt)){if(horiz) srt.txt<-0 else srt.txt<-90} #set text rotation
+
+
 #loop through polygons
   for (i in 1:nrow(intervals)) {
     ###
-    if(bw!=TRUE){polygon(
-      x=c(intervals$start[i], intervals$end[i], intervals$end[i], intervals$start[i]),
-      c(ylim[1], ylim[1], ylim[2], ylim[2]),
+    if(bw!=TRUE){
+    if(horiz) polygon(
+      y=c(intervals$start[i], intervals$end[i], intervals$end[i], intervals$start[i]),
+      x=c(ylim[1], ylim[1], ylim[2], ylim[2]),
       col = add.alpha(intervals$col[i],alpha=alpha),
       border = border
-    )}else if(bw==TRUE){
-    polygon(
-      x=c(intervals$start[i], intervals$end[i], intervals$end[i], intervals$start[i]),
-      c(ylim[1], ylim[1], ylim[2], ylim[2]),
-      col = "white",
+    ) else polygon(
+      y=c(intervals$start[i], intervals$end[i], intervals$end[i], intervals$start[i]),
+      x=c(ylim[1], ylim[1], ylim[2], ylim[2]),
+      col = add.alpha(intervals$col[i],alpha=alpha),
       border = border
     )
+    
+    }else if(bw==TRUE){
+    if(horiz) polygon(
+      x=c(intervals$start[i], intervals$end[i], intervals$end[i], intervals$start[i]),
+      y=c(ylim[1], ylim[1], ylim[2], ylim[2]),
+      col = "white",
+      border = border
+    ) else  polygon(
+      y=c(intervals$start[i], intervals$end[i], intervals$end[i], intervals$start[i]),
+      x=c(ylim[1], ylim[1], ylim[2], ylim[2]),
+      col = "white",
+      border = border
+    ) 
     ###
     }
     
-    if(names==TRUE && !(intervals$interval[i]%in%exclude)) text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt[i],...)
+    if(names==TRUE && !(intervals$interval[i]%in%exclude)) if(horiz) text(x=mean(c(intervals$start[i],intervals$end[i])),y=txt.y(ylim), adj=adj.txt,intervals$interval[i],col=col.txt[i],srt=srt.txt,...) else text(y=mean(c(intervals$start[i],intervals$end[i])),x=txt.y(ylim), adj=rev(adj.txt),intervals$interval[i],col=col.txt[i],srt=srt.txt,...)
     
   }
 
-}
+}##
 
 
 
@@ -1782,7 +1811,6 @@ return(sptab_)
 ##
 
 
-
 ##Function phylo.spindles
 #'Plots a phylogenetic tree with spindle-diagrams, optimized for showing taxonomic diversity.
 #'
@@ -1813,6 +1841,7 @@ return(sptab_)
 #' @param smooth Smoothing parameter to be passed on to divdistr_()
 #' @param tconv Logical indicating whether time scale conversion function (if any) should be applied to x column in occ, if it is a matrix or data.frame. Defaults to FALSE.
 #' @param italicize Character or numeric vector specifying which labels to italicize, if any.
+#' @param horiz Plot horizontally? (default TRUE) If FALSE, the phylogeny or spindle diagram with all settings are rotated 90 degrees counterclockwise so hat the direction of geological time is bottom to top rather than left to right.
 #' @return A plotted phylogeny with spindle diagrams plotted at each of its terminal branches.
 #' @details
 #' The phylo.spindles() function allows the plotting of a phylogeny with spindle diagrams at each of its terminal branches. Various data can be represented (e.g. disparity, abundance, various diversity measures, such as those output by the divDyn package, etc.) depending on the settings for occ and stat, but the function is optimized to plot the results of divdistr_() and does so by default.
@@ -1827,7 +1856,7 @@ return(sptab_)
 #' phylo.spindles(tree_archosauria,occ=archosauria,dscale=0.005,ages=ages_archosauria,txt.x=66)
 #' phylo.spindles(tree_archosauria,occ=diversity_table,dscale=0.005,ages=ages_archosauria,txt.x=66)
 
-phylo.spindles<-function(phylo0, occ,tconv=FALSE, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, ylimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=NULL, add=FALSE,tbmar=0.2,smooth=0,italicize=character()){
+phylo.spindles<-function(phylo0, occ,tconv=FALSE, stat=divdistr_, prefix="sptab_", pos=NULL,ages=NULL, xlimits=NULL, ylimits=NULL, res=1, weights=1, dscale=0.002, col=add.alpha("black"), fill=col,lwd=1, lty=1, cex.txt=1,col.txt=add.alpha(col,1), axis=TRUE, labels=TRUE, txt.y=0.5,txt.x=NULL,adj.x=NULL, add=FALSE,tbmar=0.2,smooth=0,italicize=character(),horiz=TRUE){
 
 if(length(tbmar)==1){tbmar<-rep(tbmar,2)}#if only one value is given for tbmar, duplicate it. Otherwise, first value is bottom, second top
 if(inherits(phylo0,"phylo")){#setting for phylogenetic tree
@@ -1900,8 +1929,8 @@ if(is.numeric(ylimits) & length(ylimits)==2){
 }else{ylimits<-c(1-tbmar[1],length(phylo0$tip.label)+tbmar[2])}#set y limits
 
 
-
-ape::plot.phylo(phylo0,x.lim=-1*(xlimits-phylo0$root.time),align.tip.label=2, label.offset=50,show.tip.label=FALSE, y.lim=ylimits)->plot1
+if(horiz) ape::plot.phylo(phylo0,x.lim=-1*(xlimits-phylo0$root.time),align.tip.label=2, label.offset=50,show.tip.label=FALSE, y.lim=ylimits)->plot1
+if(!horiz) ape::plot.phylo(phylo0,y.lim=-1*(xlimits-phylo0$root.time),align.tip.label=2, label.offset=50,show.tip.label=FALSE, x.lim=ylimits,direction="upwards")->plot1
 
 }else{
 
@@ -1910,7 +1939,9 @@ if(is.numeric(ylimits) & length(ylimits)==2){
 }else{ylimits<-c(min(pos)-tbmar[1], max(pos)+tbmar[2])}
 }else{ylimits<-c(min(pos)-tbmar[1], max(pos)+tbmar[2])}#set y limits
 
-plot(NULL, xlim=xlimits,ylim=ylimits, xlab="",ylab="",axes=FALSE)
+if(horiz) plot(NULL, xlim=xlimits,ylim=ylimits, xlab="",ylab="",axes=FALSE)
+if(!horiz) plot(NULL, ylim=xlimits,xlim=ylimits, xlab="",ylab="",axes=FALSE)
+
 plot1<-NULL
 }
 }else{#if add==TRUE
@@ -1922,7 +1953,8 @@ plot1<-tryCatch({get("last_plot.phylo", envir = ape::.PlotPhyloEnv)}, error=func
 
 #changed in v. 0.3.5 to use actual plot margins
 #if(is.null(plot1)){plot1$x.lim<-xlimits}
-plot1$x.lim<-par("usr")[1:2]
+if(horiz) plot1$x.lim<-par("usr")[1:2]
+if(!horiz) plot1$x.lim<-par("usr")[3:4]
 
 #repeat colors into vectors, if needed
 col->col_
@@ -2021,15 +2053,14 @@ plotx<-seq(plot1$x.lim[1],plot1$x.lim[2],res)}#set sequence of x values at which
 #plot spindles
 
 if(exists("cutoff")){
-viol(plotx,pos=pos[i], stat=stat, table=itable, smooth=smooth, dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty,cutoff=cutoff,w=w)}else{
-viol(plotx,pos=pos[i], stat=stat, table=itable, smooth=smooth, dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty,w=w)} #plot with cutoff values if set, viol default if not
+viol(plotx,pos=pos[i], stat=stat, table=itable, smooth=smooth, dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty,cutoff=cutoff,w=w,horiz=horiz)}else{
+viol(plotx,pos=pos[i], stat=stat, table=itable, smooth=smooth, dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty,w=w,horiz=horiz)} #plot with cutoff values if set, viol default if not
 
 }else if(is.matrix(occ) | is.data.frame(occ)){#if instead of a list object, a dataframe is given giving x and diversity values to plot (can also be co-opted to plot any other values, e.g. disparity)
-##XXX
 if(taxsel[i] %in% colnames(occ)){
 if(exists("cutoff")){
-viol(colX, pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, cutoff=cutoff, w=w)}else{
-viol(colX, pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, w=w)} #plot with cutoff values if set, viol default if not
+viol(colX, pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, cutoff=cutoff, w=w,horiz=horiz)}else{
+viol(colX, pos=pos[i], stat=occ[,taxsel[i]], dscale=dscale, col=col, fill=fill, lwd=lwd,lty=lty, w=w,horiz=horiz)} #plot with cutoff values if set, viol default if not
 }
 
 }
@@ -2043,8 +2074,8 @@ if(labels==TRUE){#add labels
     }else{j<-i}
     
     if(taxsel[i] %in% italicize | i %in% italicize){
-    text(x=txt.x[j],y=pos[i],adj=c(adj.x[i],txt.y[i]), bquote(italic(.(taxsel[i]))), cex=cex.txt,col=col.txt)
-    }else{text(x=txt.x[j],y=pos[i],adj=c(adj.x[i],txt.y[i]), taxsel[i], cex=cex.txt,col=col.txt)}
+    if(horiz) text(x=txt.x[j],y=pos[i],adj=c(adj.x[i],txt.y[i]), bquote(italic(.(taxsel[i]))), cex=cex.txt,col=col.txt) else text(y=txt.x[j],x=pos[i],adj=rev(c(adj.x[i],txt.y[i])), bquote(italic(.(taxsel[i]))), cex=cex.txt,col=col.txt,srt=90)
+    }else{if(horiz) text(x=txt.x[j],y=pos[i],adj=c(adj.x[i],txt.y[i]), taxsel[i], cex=cex.txt,col=col.txt) else text(y=txt.x[j],x=pos[i],adj=rev(c(adj.x[i],txt.y[i])), taxsel[i], cex=cex.txt,col=col.txt,srt=90)}
     
 }#end labels
 
@@ -2055,12 +2086,13 @@ if(axis==TRUE){#add time axis
 if(inherits(phylo0, "phylo")){
 ticks<-seq(round(min(c(max(xlimits),phylo0$root.time))/10)*10,round(min(xlimits)/10)*10,-25)
 
-axis(1,at=1-(ticks-phylo0$root.time), lab=ticks)}else{axis(1)}
+if(horiz) axis(1,at=1-(ticks-phylo0$root.time), lab=ticks) else axis(2,at=1-(ticks-phylo0$root.time), lab=ticks)}else{axis(1)}
 
 }
 
 }
 ##
+
 
 
 ##Function div.gg

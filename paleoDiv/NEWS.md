@@ -1,5 +1,8 @@
+# paleoDiv 0.4.13
+* added option to plot vertically using phylo.spindles(), ts.periods() and ts.stages() via parameter horiz=FALSE 
+
 # paleoDiv 0.4.12
-* some additions to features of phylo_spindles() when handling matrices or data.frames as occ input; x column can now be automatically converted to conform to phylogenetic tree plotting space, if desired, via the tconv parameter
+* some additions to features of phylo.spindles() when handling matrices or data.frames as occ input; x column can now be automatically converted to conform to phylogenetic tree plotting space, if desired, via the tconv parameter
 
 # paleoDiv 0.4.11
 * added "plot" parameter to multijitter(); if plot==FALSE, jitterplot is not plotted and only an invisible object containing all points, in original order, is returned.

@@ -31,7 +31,8 @@ phylo.spindles(
   add = FALSE,
   tbmar = 0.2,
   smooth = 0,
-  italicize = character()
+  italicize = character(),
+  horiz = TRUE
 )
 }
 \arguments{
@@ -88,6 +89,8 @@ phylo.spindles(
 \item{smooth}{Smoothing parameter to be passed on to divdistr_()}
 
 \item{italicize}{Character or numeric vector specifying which labels to italicize, if any.}
+
+\item{horiz}{Plot horizontally? (default TRUE) If FALSE, the phylogeny or spindle diagram with all settings are rotated 90 degrees counterclockwise so hat the direction of geological time is bottom to top rather than left to right.}
 }
 \value{
 A plotted phylogeny with spindle diagrams plotted at each of its terminal branches.

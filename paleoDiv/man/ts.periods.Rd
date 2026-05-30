@@ -18,6 +18,8 @@ ts.periods(
   update = NULL,
   unit = "ma",
   abbr = "n",
+  horiz = TRUE,
+  srt.txt = NULL,
   ...
 )
 }
@@ -47,6 +49,10 @@ ts.periods(
 \item{unit}{what unit of time to use. Defaults to "ma" (million years), other possible settings are "ka" or 1000 (for thousands of years), or "a", 1 or "years" for years.}
 
 \item{abbr}{Number of characters to abbreviate each name to, defaults to "all"}
+
+\item{horiz}{Plot horizontally? (default TRUE) If FALSE, all settings for the vertical dimension instead refer to the horizontal.}
+
+\item{srt.txt}{text rotation. If NULL (default) then this gets set to 0 degrees (horizontal plotting) or 90 degrees (vertical plotting)}
 
 \item{...}{additional arguments to pass on to text()}
 }
